@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "533369188578",
+    "project_id": "scheduler-b4b0f",
+    "storage_bucket": "scheduler-b4b0f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:533369188578:android:a3c1a46770b23bc5952ebb",
+        "android_client_info": {
+          "package_name": "com.theapplogics.scheduler"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "533369188578-19ik9rmvj0reija65vnqaunm7d58dvhc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXWUy8eSJZYhZ3hMtLCEFyH06h6OhpU78"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "533369188578-19ik9rmvj0reija65vnqaunm7d58dvhc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
