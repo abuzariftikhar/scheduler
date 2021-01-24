@@ -1,17 +1,22 @@
+import 'dart:ui';
+
 import 'package:cupertino_rounded_corners/cupertino_rounded_corners.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:scheduler/blocs/CustomerHomeBloc.dart';
+
+import 'custom_filled_icons_icons.dart';
+import 'custom_icons_icons.dart';
 
 class HomeListTile extends StatefulWidget {
   final String title;
-  final String imageURL;
-  final Color color;
+  final IconData iconData;
   final Widget routeTo;
 
   const HomeListTile({
     Key key,
     @required this.title,
-    @required this.imageURL,
-    @required this.color,
+    @required this.iconData,
     @required this.routeTo,
   }) : super(key: key);
   @override
@@ -42,7 +47,6 @@ class _HomeListTileState extends State<HomeListTile> {
         margin: EdgeInsets.symmetric(horizontal: 7, vertical: 2),
         width: 130,
         child: Material(
-          elevation: 0.5,
           color: Colors.white,
           shape: SquircleBorder(
             radius: 30,
@@ -57,15 +61,15 @@ class _HomeListTileState extends State<HomeListTile> {
                   height: 90,
                   width: 125,
                   child: Material(
-                    color: Colors.blueGrey.shade50,
+                    color: Colors.blueAccent.withOpacity(0.1),
                     shape: SquircleBorder(radius: 30),
                     child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Image.asset(
-                        widget.imageURL,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
+                        padding: const EdgeInsets.all(20.0),
+                        child: Icon(
+                          widget.iconData,
+                          size: 36,
+                          color: Colors.blueAccent,
+                        )),
                   ),
                 ),
                 Padding(
@@ -145,7 +149,7 @@ class _SingleImageBannerState extends State<SingleImageBanner> {
                         Text(
                           widget.title,
                           style: TextStyle(
-                            color: Colors.black,
+                            color: Colors.blueAccent,
                             fontWeight: FontWeight.bold,
                             fontSize: 22,
                           ),
@@ -197,6 +201,125 @@ class _SingleImageBannerState extends State<SingleImageBanner> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class CustomBottomBar extends StatefulWidget {
+  @override
+  _CustomBottomBarState createState() => _CustomBottomBarState();
+}
+
+class _CustomBottomBarState extends State<CustomBottomBar> {
+  @override
+  Widget build(BuildContext context) {
+    return ClipRect(
+      clipBehavior: Clip.antiAlias,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
+        child: Container(
+          height: 60,
+          color: Colors.white24,
+          width: MediaQuery.of(context).size.width,
+          child: Material(
+            clipBehavior: Clip.none,
+            type: MaterialType.transparency,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                BBarIcon(
+                  title: "Home",
+                  iconData: CustomIcons.fi_rr_home,
+                  selectedIcon: CustomFilledIcons.fi_sr_home,
+                  index: 0,
+                ),
+                BBarIcon(
+                  title: "Services",
+                  iconData: CustomIcons.fi_rr_asterisk,
+                  selectedIcon: CustomFilledIcons.fi_sr_asterisk,
+                  index: 1,
+                ),
+                BBarIcon(
+                  title: "Cart",
+                  iconData: CustomIcons.fi_rr_shopping_bag,
+                  selectedIcon: CustomFilledIcons.fi_sr_shopping_bag,
+                  index: 2,
+                ),
+                BBarIcon(
+                  title: "Profile",
+                  iconData: CustomIcons.fi_rr_portrait,
+                  selectedIcon: CustomFilledIcons.fi_sr_portrait,
+                  index: 3,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class BBarIcon extends StatefulWidget {
+  final int index;
+  final String title;
+  final IconData iconData;
+  final IconData selectedIcon;
+
+  const BBarIcon({
+    Key key,
+    @required this.title,
+    @required this.iconData,
+    @required this.selectedIcon,
+    @required this.index,
+  }) : super(key: key);
+  @override
+  _BBarIconState createState() => _BBarIconState();
+}
+
+class _BBarIconState extends State<BBarIcon> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Consumer<CustomerHomeBloc>(builder: (context, value, _) {
+        return InkResponse(
+          onTap: () {
+            value.index = widget.index;
+            value.update();
+          },
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedSwitcher(
+                duration: Duration(milliseconds: 300),
+                child: widget.index == value.index
+                    ? Icon(
+                        widget.selectedIcon,
+                        key: Key("selected"),
+                        color: Colors.blueAccent,
+                      )
+                    : Icon(
+                        widget.iconData,
+                        key: Key("unselected"),
+                        color: Colors.grey,
+                      ),
+              ),
+              SizedBox(
+                height: 3,
+              ),
+              Text(
+                widget.title,
+                style: TextStyle(
+                  color: widget.index == value.index
+                      ? Colors.blueAccent.shade700
+                      : Colors.grey,
+                ),
+              )
+            ],
+          ),
+        );
+      }),
     );
   }
 }

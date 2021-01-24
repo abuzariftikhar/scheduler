@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:scheduler/blocs/ServicesManagerBloc.dart';
 import 'package:scheduler/views/mobile/AddServiceForm.dart';
 import 'package:scheduler/widgets/ForServiceManager.dart';
+import 'package:scheduler/widgets/custom_icons_icons.dart';
 
 class ServicesManagementScreen extends StatefulWidget {
   @override
@@ -128,16 +129,17 @@ class _ServicesManagementScreenState extends State<ServicesManagementScreen> {
               );
             },
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    Icons.add,
+                    CustomIcons.fi_rr_apps_add,
+                    size: 16,
                     color: Colors.white,
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Text(
                       "Add Service",
                       style: TextStyle(color: Colors.white),

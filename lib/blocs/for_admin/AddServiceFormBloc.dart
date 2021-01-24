@@ -6,11 +6,12 @@ import 'package:scheduler/models/ServiceModel.dart';
 import 'package:scheduler/repository/ServicesRepository.dart';
 
 class AddServiceFormBloc extends ChangeNotifier {
+  int color = Colors.yellow.shade900.value;
   bool isPosting = false;
   ServiceReopsitory _servicesRepoHelper = ServiceRepositoryImpl();
   String title = "Default Title";
   String detailsText = "";
-  String badge = "None";
+  String category = "Expert";
   String serviceType = "Hair Cutting";
   String price = "12.99";
   int timeRequired = 15;
@@ -37,7 +38,7 @@ class AddServiceFormBloc extends ChangeNotifier {
     print('File Uploaded @ $imageURL');
   }
 
-  Future<bool> postService(ServiceModel serviceModel) async {
+  Future<bool> postService(ServiceItem serviceModel) async {
     bool result = await _servicesRepoHelper.createService(serviceModel);
     isPosting = false;
     notifyListeners();

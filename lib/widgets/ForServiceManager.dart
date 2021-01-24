@@ -7,7 +7,7 @@ import 'package:scheduler/views/mobile/ServiceDetailsScreen.dart';
 
 class ServiceTile extends StatefulWidget {
   final String heroTag;
-  final ServiceModel serviceModel;
+  final ServiceItem serviceModel;
   const ServiceTile({
     Key key,
     @required this.serviceModel,
@@ -94,7 +94,7 @@ class _ServiceTileState extends State<ServiceTile> {
                           ),
                         ),
                         Text("Type: ${widget.serviceModel.type}"),
-                        Text("Badge: ${widget.serviceModel.badge}"),
+                        Text("Badge: ${widget.serviceModel.category}"),
                         Text(
                           "Cost: ${widget.serviceModel.cost}",
                           style: TextStyle(

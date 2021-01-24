@@ -2,12 +2,14 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 import 'package:cupertino_rounded_corners/cupertino_rounded_corners.dart';
+import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:scheduler/blocs/AddServiceFormBloc.dart';
+import 'package:scheduler/blocs/for_admin/AddServiceFormBloc.dart';
 import 'package:scheduler/models/ServiceModel.dart';
 import 'package:scheduler/widgets/Common.dart';
 
@@ -19,11 +21,76 @@ class AddServiceForm extends StatefulWidget {
 class _AddServiceFormState extends State<AddServiceForm> {
   Timer timer;
   int charLength = 0;
+  Color dialogPickerColor = Colors.white;
+  static const Color guidePrimary = Color(0xFF6200EE);
+  static const Color guidePrimaryVariant = Color(0xFF3700B3);
+  static const Color guideSecondary = Color(0xFF03DAC6);
+  static const Color guideSecondaryVariant = Color(0xFF018786);
+  static const Color guideError = Color(0xFFB00020);
+  static const Color guideErrorDark = Color(0xFFCF6679);
+  static const Color blueBlues = Color(0xFF174378);
+
+  // Make a custom ColorSwatch to name map from the above custom colors.
+  final Map<ColorSwatch<Object>, String> colorsNameMap =
+      <ColorSwatch<Object>, String>{
+    ColorTools.createPrimarySwatch(guidePrimary): 'Guide Purple',
+    ColorTools.createPrimarySwatch(guidePrimaryVariant): 'Guide Purple Variant',
+    ColorTools.createAccentSwatch(guideSecondary): 'Guide Teal',
+    ColorTools.createAccentSwatch(guideSecondaryVariant): 'Guide Teal Variant',
+    ColorTools.createPrimarySwatch(guideError): 'Guide Error',
+    ColorTools.createPrimarySwatch(guideErrorDark): 'Guide Error Dark',
+    ColorTools.createPrimarySwatch(blueBlues): 'Blue blues',
+  };
 
   _onChanged(String value) {
     setState(() {
       charLength = value.length;
     });
+  }
+
+  Future<bool> colorPickerDialog() async {
+    return ColorPicker(
+      color: dialogPickerColor,
+      onColorChanged: (Color color) =>
+          setState(() => dialogPickerColor = color),
+      width: 40,
+      height: 40,
+      borderRadius: 4,
+      spacing: 5,
+      runSpacing: 5,
+      wheelDiameter: 155,
+      heading: Text(
+        'Select color',
+        style: Theme.of(context).textTheme.subtitle1,
+      ),
+      subheading: Text(
+        'Select color shade',
+        style: Theme.of(context).textTheme.subtitle1,
+      ),
+      wheelSubheading: Text(
+        'Selected color and its shades',
+        style: Theme.of(context).textTheme.subtitle1,
+      ),
+      showMaterialName: true,
+      showColorName: true,
+      showColorCode: true,
+      materialNameTextStyle: Theme.of(context).textTheme.caption,
+      colorNameTextStyle: Theme.of(context).textTheme.caption,
+      colorCodeTextStyle: Theme.of(context).textTheme.caption,
+      pickersEnabled: const <ColorPickerType, bool>{
+        ColorPickerType.both: false,
+        ColorPickerType.primary: true,
+        ColorPickerType.accent: true,
+        ColorPickerType.bw: false,
+        ColorPickerType.custom: true,
+        ColorPickerType.wheel: true,
+      },
+      customColorSwatchesAndNames: colorsNameMap,
+    ).showPickerDialog(
+      context,
+      constraints:
+          const BoxConstraints(minHeight: 460, minWidth: 300, maxWidth: 320),
+    );
   }
 
   final _detailsController = TextEditingController();
@@ -71,10 +138,11 @@ class _AddServiceFormState extends State<AddServiceForm> {
                                 onTap: () async {
                                   await value.uploadFile();
                                   bool result = await value.postService(
-                                    ServiceModel(
+                                    ServiceItem(
                                       name: value.title,
+                                      color: dialogPickerColor.value,
                                       type: value.serviceType,
-                                      badge: value.badge,
+                                      category: value.category,
                                       cost: value.price,
                                       timeRequired: value.timeRequired,
                                       imageURL: value.imageURL,
@@ -608,25 +676,96 @@ class _AddServiceFormState extends State<AddServiceForm> {
                                   ),
                                 ),
                                 SizedBox(width: 8.0),
-                                Text("Select a Badge"),
+                                Text("In-App Category"),
                               ],
                             ),
                             Consumer<AddServiceFormBloc>(
                                 builder: (context, snapshot, _) {
                               return CustomDropdownList(
-                                initialvalue: snapshot.badge,
+                                initialvalue: snapshot.category,
                                 valueChanged: (val, index) {
-                                  snapshot.badge = val;
+                                  snapshot.category = val;
                                   snapshot.update();
                                 },
                                 itemList: [
-                                  "None",
+                                  "Best",
+                                  "Banner",
+                                  "Expert",
                                   "Premium",
                                   "Popular",
-                                  "Best",
+                                  "Top-Rated",
                                 ],
                               );
                             }),
+                          ],
+                        ),
+                        Divider(
+                          height: 20,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  height: 40,
+                                  width: 40,
+                                  child: Material(
+                                    color: Colors.blue.shade900,
+                                    shape: SquircleBorder(
+                                      radius: 30.0,
+                                    ),
+                                    child: Icon(
+                                      CupertinoIcons.money_dollar_circle,
+                                      color: Colors.white,
+                                      size: 22,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 8,
+                                ),
+                                Text("Set a Color"),
+                              ],
+                            ),
+                            Container(
+                              height: 60.0,
+                              width: MediaQuery.of(context).size.width / 2.2,
+                              child: InkWell(
+                                onTap: () {
+                                  colorPickerDialog();
+                                },
+                                child: Material(
+                                  clipBehavior: Clip.antiAlias,
+                                  color: Colors.white,
+                                  shape: SquircleBorder(
+                                    radius: 30.0,
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 15),
+                                    child: Center(
+                                        child: Row(
+                                      children: [
+                                        Container(
+                                          height: 45,
+                                          width: 45,
+                                          child: Material(
+                                            color: dialogPickerColor,
+                                            shape: SquircleBorder(
+                                              radius: 30.0,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 10),
+                                        Text("Choose a Color"),
+                                      ],
+                                    )),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                         Divider(

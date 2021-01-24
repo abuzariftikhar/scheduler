@@ -3,6 +3,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:scheduler/blocs/CartBloc.dart';
+import 'package:scheduler/blocs/CustomerHomeBloc.dart';
 import 'package:scheduler/views/mobile/HomeScreen.dart';
 
 Future<void> main() async {
@@ -22,25 +25,22 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'QR Generator-Scanner',
-      theme: ThemeData(
-          splashFactory: InkRipple.splashFactory,
-          splashColor: Colors.blueAccent.withOpacity(0.2),
-          highlightColor: Colors.transparent,
-          scaffoldBackgroundColor: Color(0xffecebf1),
-          primarySwatch: createMaterialColor(Colors.black)),
-      home: AuthenticationWrapper(),
-    );
-  }
-}
-
-class AuthenticationWrapper extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return HomeScreen(
-      adminMode: true,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => CartBloc()),
+        ChangeNotifierProvider(create: (context) => CustomerHomeBloc()),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'QR Generator-Scanner',
+        theme: ThemeData(
+            splashFactory: InkRipple.splashFactory,
+            splashColor: Colors.blueAccent.withOpacity(0.2),
+            highlightColor: Colors.transparent,
+            scaffoldBackgroundColor: Color(0xffecebf1),
+            primarySwatch: createMaterialColor(Colors.black)),
+        home: HomeScreen(adminMode: false),
+      ),
     );
   }
 }

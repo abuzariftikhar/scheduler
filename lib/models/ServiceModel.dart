@@ -1,32 +1,35 @@
 import 'package:flutter/material.dart';
 
-class ServiceModel {
+class ServiceItem {
   String id;
   final String name;
+  final int color;
   final int timeRequired;
   final String type;
-  final String badge;
+  final String category;
   final String imageURL;
   final String cost;
   final String detailText;
 
-  ServiceModel({
+  ServiceItem({
     this.id = "",
+    @required this.color,
     @required this.name,
     @required this.type,
-    @required this.badge,
+    @required this.category,
     @required this.cost,
     @required this.timeRequired,
     @required this.imageURL,
     @required this.detailText,
   });
 
-  factory ServiceModel.fromMap(Map<String, dynamic> item) {
-    return ServiceModel(
+  factory ServiceItem.fromMap(Map<String, dynamic> item) {
+    return ServiceItem(
       id: item["id"],
+      color: item["color"],
       name: item["name"],
       type: item["type"],
-      badge: item["badge"],
+      category: item["category"],
       cost: item["cost"],
       timeRequired: item["timeRequired"],
       imageURL: item["imageURL"],
@@ -37,9 +40,10 @@ class ServiceModel {
   Map<String, dynamic> toMap() {
     return {
       "id": id,
+      "color": color,
       "name": name,
       "type": type,
-      "badge": badge,
+      "category": category,
       "cost": cost,
       "timeRequired": timeRequired,
       "imageURL": imageURL,

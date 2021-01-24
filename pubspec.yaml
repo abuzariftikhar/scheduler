@@ -23,12 +23,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  cached_network_image: ^2.5.0
   cloud_firestore: ^0.16.0
   cupertino_icons: ^1.0.1
   cupertino_rounded_corners: ^1.0.3
   firebase_auth: ^0.20.0+1
   firebase_core: ^0.7.0
   firebase_storage: ^7.0.0
+  flex_color_picker: ^1.1.3
   flutter_qr_reader: ^1.0.3
   fluttertoast: ^7.1.6
   image_picker: ^0.6.7+21
@@ -66,9 +68,15 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
-    - family: kumbh
+    - family: CustomIcons
       fonts:
-        - asset: assets/fonts/KumbhSans-Regular.ttf
+        - asset: assets/fonts/CustomIcons.ttf
+    - family: CustomFilledIcons
+      fonts:
+        - asset: assets/fonts/CustomFilledIcons.ttf
+    - family: ServicesIcons
+      fonts:
+        - asset: assets/fonts/ServicesIcons.ttf
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro

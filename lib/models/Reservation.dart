@@ -4,28 +4,22 @@ import 'package:scheduler/models/ServiceModel.dart';
 class Reservation {
   String id;
   final String userId;
-  final String status;
-  final List<ServiceModel> listOfServices;
-  final DateTime startTime;
-  final DateTime endTime;
+  final List<ServiceItem> listOfServices;
+  final DateTime startDateTime;
 
   Reservation({
     this.id = '',
     @required this.userId,
-    @required this.status,
     @required this.listOfServices,
-    @required this.startTime,
-    @required this.endTime,
+    @required this.startDateTime,
   });
 
   factory Reservation.fromMap(Map<String, dynamic> reservation) {
     return Reservation(
       id: reservation["id"],
       userId: reservation["userId"],
-      status: reservation["status"],
       listOfServices: reservation["listOfServices"],
-      startTime: reservation["startTime"],
-      endTime: reservation["endTime"],
+      startDateTime: reservation["startDateTime"],
     );
   }
 
@@ -33,10 +27,8 @@ class Reservation {
     return {
       "id": id,
       "userId": userId,
-      "status": status,
       "listOfServices": listOfServices,
-      "startTime": startTime,
-      "endTime": endTime,
+      "startDateTime": startDateTime,
     };
   }
 }
