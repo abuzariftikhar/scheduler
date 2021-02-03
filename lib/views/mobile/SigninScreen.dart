@@ -1,8 +1,11 @@
 import 'package:cupertino_rounded_corners/cupertino_rounded_corners.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
+import 'package:scheduler/blocs/AuthenticationBloc.dart';
+import 'package:scheduler/views/mobile/HomeScreen.dart';
 import 'package:scheduler/views/mobile/SignupScreen.dart';
+import 'package:scheduler/widgets/custom_icons_icons.dart';
 
 class SignIn extends StatelessWidget {
   final TextEditingController passwordController = TextEditingController();
@@ -88,49 +91,85 @@ class SignIn extends StatelessWidget {
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 30, vertical: 8),
                 alignment: Alignment.center,
-                height: 65,
                 width: MediaQuery.of(context).size.width,
                 child: Material(
                   color: Colors.blueGrey.shade50,
                   shape: SquircleBorder(radius: 30),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: TextFormField(
-                      focusNode: _emailFocus,
-                      controller: emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      decoration: InputDecoration(
-                        labelText: 'Email',
-                        hintText: 'example@domain.com',
-                        border: InputBorder.none,
-                      ),
-                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    child: Consumer<AuthenticationBloc>(
+                        builder: (context, value, _) {
+                      return TextFormField(
+                        focusNode: _emailFocus,
+                        controller: emailController,
+                        textAlignVertical: TextAlignVertical.center,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        onChanged: (text) {
+                          value.signInError = "";
+                          value.update();
+                        },
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(CustomIcons.fi_rr_portrait),
+                          hintText: 'Email',
+                          border: InputBorder.none,
+                        ),
+                      );
+                    }),
                   ),
                 ),
               ),
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 30, vertical: 8),
-                alignment: Alignment.center,
-                height: 65,
                 width: MediaQuery.of(context).size.width,
                 child: Material(
                   color: Colors.blueGrey.shade50,
                   shape: SquircleBorder(radius: 30),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: TextFormField(
-                      focusNode: _passwordFocus,
-                      controller: passwordController,
-                      obscureText: true,
-                      keyboardType: TextInputType.visiblePassword,
-                      decoration: InputDecoration(
-                        labelText: 'Password',
-                        border: InputBorder.none,
-                      ),
-                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    child: Consumer<AuthenticationBloc>(
+                        builder: (context, value, _) {
+                      return TextFormField(
+                        focusNode: _passwordFocus,
+                        controller: passwordController,
+                        onChanged: (text) {
+                          value.signInError = "";
+                          value.update();
+                        },
+                        obscureText: true,
+                        textAlignVertical: TextAlignVertical.center,
+                        keyboardType: TextInputType.visiblePassword,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(CustomIcons.fi_rr_lock),
+                          hintText: 'Password',
+                          border: InputBorder.none,
+                        ),
+                      );
+                    }),
                   ),
                 ),
+              ),
+              Consumer<AuthenticationBloc>(
+                builder: (context, value, _) {
+                  if (value.signInError == "") {
+                    return Container();
+                  } else
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 10,
+                      ),
+                      child: Text(
+                        value.signInError,
+                        style: TextStyle(
+                          color: Colors.redAccent,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    );
+                },
               ),
               Padding(
                 padding:
@@ -138,31 +177,48 @@ class SignIn extends StatelessWidget {
                 child: Row(
                   children: [
                     Expanded(
-                      child: CupertinoButton.filled(
-                        child: Text('Sign in'),
-                        onPressed: () async {
-                          // bool message = await context
-                          //     .read<AuthenticationService>()
-                          //     .signIn(
-                          //       emailController.text,
-                          //       passwordController.text,
-                          //     );
-                          Fluttertoast.showToast(
-                            msg: "message.toString(),",
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.BOTTOM,
-                            timeInSecForIosWeb: 1,
-                            backgroundColor: Colors.grey.shade200,
-                            textColor: Colors.grey.shade600,
-                          );
-                        },
-                      ),
+                      child: Consumer<AuthenticationBloc>(
+                          builder: (context, value, _) {
+                        return CupertinoButton.filled(
+                          child: Text('Sign in'),
+                          onPressed: () async {
+                            bool successful =
+                                await value.signInWithEmailAndPassword(
+                                    emailController.text,
+                                    passwordController.text);
+                            if (successful) {
+                              Navigator.pushReplacement(context,
+                                  PageRouteBuilder(pageBuilder:
+                                      (context, animation, animation2) {
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: HomeScreen(
+                                    adminMode: false,
+                                  ),
+                                );
+                              }));
+                            }
+                          },
+                        );
+                      }),
                     ),
                   ],
                 ),
               ),
             ],
-          )
+          ),
+          Consumer<AuthenticationBloc>(builder: (context, value, _) {
+            if (value.isBusy) {
+              return Container(
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                color: Colors.white24,
+                child: Center(child: CircularProgressIndicator()),
+              );
+            } else {
+              return Container();
+            }
+          }),
         ],
       ),
     );

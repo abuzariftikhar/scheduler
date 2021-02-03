@@ -1,7 +1,7 @@
 import 'package:cupertino_rounded_corners/cupertino_rounded_corners.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:scheduler/blocs/ServicesManagerBloc.dart';
+import 'package:scheduler/blocs/for_admin/ServicesManagerBloc.dart';
 import 'package:scheduler/models/ServiceModel.dart';
 import 'package:scheduler/views/mobile/ServiceDetailsScreen.dart';
 
@@ -66,7 +66,7 @@ class _ServiceTileState extends State<ServiceTile> {
                         child: FadeInImage.assetNetwork(
                           fadeInCurve: Curves.easeIn,
                           placeholder: "assets/loading-animation.gif",
-                          image: widget.serviceModel.imageURL,
+                          image: widget.serviceModel.imageURLs[0],
                           alignment: Alignment.center,
                           fit: BoxFit.cover,
                           height: 124,

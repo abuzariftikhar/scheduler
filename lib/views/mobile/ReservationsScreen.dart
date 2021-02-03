@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:scheduler/blocs/ReservationsBloc.dart';
+import 'package:scheduler/blocs/for_admin/AppointmentsBloc.dart';
 import 'package:scheduler/widgets/ForReservations.dart';
 
 class ReservationsScreen extends StatefulWidget {

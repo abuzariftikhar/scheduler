@@ -7,7 +7,7 @@ import 'package:scheduler/views/mobile/QuickEntryScreen.dart';
 import 'package:scheduler/views/mobile/ServicesManagement.dart';
 import 'package:scheduler/widgets/custom_icons_icons.dart';
 
-import '../ServicesManagerBloc.dart';
+import 'ServicesManagerBloc.dart';
 
 class HomeBloc extends ChangeNotifier {
   List<ListItemModel> listItem = [

@@ -5,13 +5,15 @@ class Reservation {
   String id;
   final String userId;
   final List<ServiceItem> listOfServices;
-  final DateTime startDateTime;
+  final String date;
+  final List<int> slots;
 
   Reservation({
     this.id = '',
     @required this.userId,
     @required this.listOfServices,
-    @required this.startDateTime,
+    @required this.date,
+    @required this.slots,
   });
 
   factory Reservation.fromMap(Map<String, dynamic> reservation) {
@@ -19,7 +21,8 @@ class Reservation {
       id: reservation["id"],
       userId: reservation["userId"],
       listOfServices: reservation["listOfServices"],
-      startDateTime: reservation["startDateTime"],
+      date: reservation["date"],
+      slots: reservation["slots"],
     );
   }
 
@@ -28,7 +31,8 @@ class Reservation {
       "id": id,
       "userId": userId,
       "listOfServices": listOfServices,
-      "startDateTime": startDateTime,
+      "date": date,
+      "slots": slots,
     };
   }
 }

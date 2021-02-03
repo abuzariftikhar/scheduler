@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:cupertino_rounded_corners/cupertino_rounded_corners.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:scheduler/blocs/ServicesManagerBloc.dart';
+import 'package:scheduler/blocs/for_admin/ServicesManagerBloc.dart';
 import 'package:scheduler/views/mobile/AddServiceForm.dart';
 import 'package:scheduler/widgets/ForServiceManager.dart';
 import 'package:scheduler/widgets/custom_icons_icons.dart';

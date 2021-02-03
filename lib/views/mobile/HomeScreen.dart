@@ -2,13 +2,18 @@ import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cupertino_rounded_corners/cupertino_rounded_corners.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:provider/provider.dart';
+import 'package:scheduler/blocs/AuthenticationBloc.dart';
+import 'package:scheduler/blocs/BookingScreenBloc.dart';
 import 'package:scheduler/blocs/CartBloc.dart';
 import 'package:scheduler/blocs/CustomerHomeBloc.dart';
 import 'package:scheduler/blocs/for_admin/HomeBloc.dart';
 import 'package:scheduler/models/ServiceModel.dart';
+import 'package:scheduler/views/mobile/BookServiceScreen.dart';
+import 'package:scheduler/views/mobile/LandingScreen.dart';
 import 'package:scheduler/views/mobile/QuickEntryScreen.dart';
 import 'package:scheduler/widgets/ForHome.dart';
 import 'package:scheduler/widgets/custom_filled_icons_icons.dart';
@@ -266,7 +271,7 @@ class CustomerHome extends StatefulWidget {
 }
 
 class _CustomerHomeState extends State<CustomerHome> {
-  Widget _getHomeWidget(int index) {
+  Widget _getHomeScreen(int index) {
     Widget _widget = Container();
     if (index == 0) {
       _widget = HomeLanding();
@@ -275,7 +280,7 @@ class _CustomerHomeState extends State<CustomerHome> {
     } else if (index == 2) {
       _widget = HomeCart();
     } else if (index == 3) {
-      _widget = HomeProfile();
+      _widget = HomeMyReservations();
     }
     return _widget;
   }
@@ -298,8 +303,20 @@ class _CustomerHomeState extends State<CustomerHome> {
             builder: (context, value, _) {
               return AnimatedSwitcher(
                   duration: Duration(milliseconds: 300),
-                  reverseDuration: Duration(milliseconds: 100),
-                  child: _getHomeWidget(value.index));
+                  reverseDuration: Duration(milliseconds: 10),
+                  transitionBuilder: (child, animation) {
+                    return SlideTransition(
+                      position: Tween<Offset>(
+                              begin: value.index > value.previousIndex
+                                  ? Offset(0.2, 0)
+                                  : Offset(-0.2, 0),
+                              end: Offset(0, 0))
+                          .chain(CurveTween(curve: Curves.easeOutCirc))
+                          .animate(animation),
+                      child: child,
+                    );
+                  },
+                  child: _getHomeScreen(value.index));
             },
           ),
           Align(
@@ -314,133 +331,321 @@ class _CustomerHomeState extends State<CustomerHome> {
 
 class HomeServiceTile extends StatelessWidget {
   final ServiceItem serviceItem;
-  final String heroTag;
   const HomeServiceTile({
     Key key,
     @required this.serviceItem,
-    @required this.heroTag,
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return Hero(
-      tag: heroTag,
-      child: Container(
-        margin: EdgeInsets.only(left: 20, right: 20, bottom: 10),
-        height: 125,
-        child: Material(
-          clipBehavior: Clip.antiAlias,
-          color: Color(serviceItem.color).withOpacity(0.2),
-          shape: SquircleBorder(
-            radius: 30,
-          ),
-          child: Consumer<CustomerHomeBloc>(builder: (context, value, _) {
-            return InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation, animation2) {
-                      return ServiceDetailsView(
-                        serviceItem: serviceItem,
-                        heroTag: heroTag,
-                      );
-                    },
-                  ),
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(3),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          height: 125,
-                          width: 98,
-                          child: Material(
-                            shape: SquircleBorder(
-                              radius: 30,
-                            ),
-                            color: Colors.white,
-                            clipBehavior: Clip.antiAlias,
-                            child: CachedNetworkImage(
-                              progressIndicatorBuilder:
-                                  (context, url, downloadProgress) => Container(
-                                height: 40,
-                                width: 40,
-                                child: CircularProgressIndicator(
-                                    value: downloadProgress.progress),
-                              ),
-                              imageUrl: serviceItem.imageURL,
-                              alignment: Alignment.center,
-                              fit: BoxFit.cover,
-                              height: 145,
-                              width: 88,
-                            ),
+    return Container(
+      margin: EdgeInsets.only(left: 20, right: 20, bottom: 10),
+      height: 130,
+      child: Material(
+        elevation: 6,
+        shadowColor: Colors.blueGrey.shade50.withOpacity(0.5),
+        clipBehavior: Clip.antiAlias,
+        color: Colors.grey.shade100,
+        shape: SquircleBorder(
+          radius: 30,
+        ),
+        child: Consumer<CustomerHomeBloc>(builder: (context, value, _) {
+          return InkWell(
+            splashColor: Colors.white24,
+            onTap: () {
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, animation2) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                                begin: Offset(0, 1), end: Offset(0, 0))
+                            .chain(CurveTween(
+                              curve: Curves.easeInOutCirc,
+                            ))
+                            .animate(animation),
+                        child: ServiceDetailsView(
+                          serviceItem: serviceItem,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(3),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        height: 130,
+                        width: 130,
+                        child: Material(
+                          shape: SquircleBorder(
+                            radius: 30,
+                          ),
+                          color: Colors.white,
+                          clipBehavior: Clip.antiAlias,
+                          child: CachedNetworkImage(
+                            imageUrl: serviceItem.imageURLs[0],
+                            alignment: Alignment.center,
+                            fit: BoxFit.cover,
+                            height: 115,
+                            width: 130,
                           ),
                         ),
-                        Container(
-                            margin: EdgeInsets.only(left: 10),
-                            height: 114,
-                            width: 200,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  serviceItem.name,
+                      ),
+                      Container(
+                          margin: EdgeInsets.only(left: 10),
+                          height: 114,
+                          width: 200,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                serviceItem.name,
+                                style: TextStyle(
+                                  color: Colors.blueGrey.shade900,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
+                              Consumer<CartBloc>(builder: (context, value, _) {
+                                return Text(
+                                  value.durationToString(
+                                      serviceItem.timeRequired),
                                   style: TextStyle(
-                                    color: Color(serviceItem.color),
+                                    color: Colors.blueGrey,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 18,
                                   ),
-                                ),
-                                SizedBox(height: 5),
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 5, horizontal: 10),
-                                  decoration: BoxDecoration(
-                                    color: Color(serviceItem.color),
-                                    borderRadius: BorderRadius.circular(30),
-                                  ),
-                                  child: Text(
-                                    serviceItem.category == "Banner"
-                                        ? "Best"
-                                        : "${serviceItem.category}",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                                );
+                              }),
+                              SizedBox(height: 10),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: 5, horizontal: 10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blueGrey,
+                                      borderRadius: BorderRadius.circular(30),
                                     ),
-                                  ),
-                                ),
-                                SizedBox(height: 5),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      "\$${serviceItem.cost}",
+                                    child: Text(
+                                      serviceItem.category == "Banner"
+                                          ? "Best"
+                                          : "${serviceItem.category}",
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        color: Color(serviceItem.color),
-                                        fontSize: 22,
+                                        color: Colors.white,
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ],
-                            )),
+                                  ),
+                                  Text(
+                                    "\$${serviceItem.cost}",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blueGrey,
+                                      fontSize: 22,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          )),
+                    ],
+                  ),
+                  Icon(
+                    Icons.keyboard_arrow_right_rounded,
+                    color: Colors.blueGrey,
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+}
+
+class HomeServiceTile2 extends StatefulWidget {
+  final ServiceItem serviceItem;
+
+  const HomeServiceTile2({Key key, this.serviceItem}) : super(key: key);
+  @override
+  _HomeServiceTile2State createState() => _HomeServiceTile2State();
+}
+
+class _HomeServiceTile2State extends State<HomeServiceTile2> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+      height: 170,
+      child: Material(
+        clipBehavior: Clip.hardEdge,
+        elevation: 6,
+        shadowColor: Colors.blueGrey.shade50.withOpacity(0.5),
+        color: Colors.grey.shade100,
+        shape: SquircleBorder(radius: 30),
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation, animation2) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position:
+                          Tween<Offset>(begin: Offset(0, 1), end: Offset(0, 0))
+                              .chain(CurveTween(
+                                curve: Curves.easeInOutCirc,
+                              ))
+                              .animate(animation),
+                      child: ServiceDetailsView(
+                        serviceItem: widget.serviceItem,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+          child: Row(
+            children: [
+              Container(
+                width: MediaQuery.of(context).size.width / 2,
+                padding: EdgeInsets.fromLTRB(20, 20, 10, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.serviceItem.type,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blueGrey,
+                          ),
+                        ),
+                        Text(
+                          widget.serviceItem.name,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.blueGrey.shade800,
+                          ),
+                        ),
+                        Consumer<CartBloc>(builder: (context, value, _) {
+                          return Text(
+                            value.durationToString(
+                                widget.serviceItem.timeRequired),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blueGrey,
+                            ),
+                          );
+                        }),
                       ],
                     ),
-                    Icon(
-                      Icons.keyboard_arrow_right_rounded,
-                      color: Color(serviceItem.color),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Consumer<CartBloc>(builder: (context, value, _) {
+                          return GestureDetector(
+                            onTap: () {
+                              bool result = value.addtocart(widget.serviceItem);
+                              showSimpleNotification(
+                                Text(
+                                  result
+                                      ? "${widget.serviceItem.name} already present in cart."
+                                      : "${widget.serviceItem.name} added to cart.",
+                                ),
+                              );
+                            },
+                            child: Container(
+                              width: 100,
+                              margin: EdgeInsets.only(top: 5),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 20.0, vertical: 8.0),
+                              decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black12,
+                                    blurRadius: 10,
+                                  )
+                                ],
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    CustomFilledIcons.fi_sr_shopping_bag_add,
+                                    size: 16,
+                                    color: Colors.blueGrey,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    "Add",
+                                    textAlign: TextAlign.start,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.blueGrey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }),
+                        Text(
+                          "\$${widget.serviceItem.cost}",
+                          textAlign: TextAlign.start,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blueGrey.shade700,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-            );
-          }),
+              Container(
+                height: 160,
+                width: MediaQuery.of(context).size.width / 2.5,
+                padding: EdgeInsets.all(2),
+                child: Material(
+                  shape: SquircleBorder(
+                    radius: 30,
+                  ),
+                  color: Colors.white,
+                  clipBehavior: Clip.antiAlias,
+                  child: CachedNetworkImage(
+                    imageUrl: widget.serviceItem.imageURLs[0],
+                    alignment: Alignment.center,
+                    fit: BoxFit.cover,
+                    height: MediaQuery.of(context).size.width / 2.3,
+                    width: 130,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -458,64 +663,75 @@ class _HomeLandingState extends State<HomeLanding> {
     return CustomScrollView(
       physics: BouncingScrollPhysics(),
       slivers: [
-        SliverAppBar(
-            backgroundColor: Colors.white,
-            expandedHeight: 160,
-            elevation: 1,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                height: 160,
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 300, sigmaY: 300),
-                  child: Stack(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(height: 20),
-                            Material(
-                              shape: SquircleBorder(radius: 30),
-                              color: Colors.blueAccent.shade700,
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Icon(
-                                  CustomFilledIcons.fi_sr_barber_shop,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            Text(
-                              "Hi, Ahmed",
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 36,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              "Welcome, What service would you like to try today?",
-                              style: TextStyle(
-                                color: Colors.grey.shade700,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+        SliverToBoxAdapter(
+          child: SizedBox(height: 50),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Discover",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 36,
                   ),
                 ),
+                Consumer<AuthenticationBloc>(builder: (context, value, _) {
+                  return GestureDetector(
+                    onTap: () {
+                      value.signOut();
+                      Navigator.pushReplacement(context, PageRouteBuilder(
+                          pageBuilder: (context, animation, animation2) {
+                        return FadeTransition(
+                          opacity: animation,
+                          child: LandingScreen(),
+                        );
+                      }));
+                    },
+                    child: Container(
+                      clipBehavior: Clip.hardEdge,
+                      height: 40,
+                      width: 40,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(25.0),
+                        color: Colors.blueGrey.shade50,
+                      ),
+                      child: Image.asset("assets/avatar.png"),
+                    ),
+                  );
+                })
+              ],
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Container(
+            margin: EdgeInsets.symmetric(horizontal: 20),
+            height: 60,
+            child: Material(
+              shape: SquircleBorder(radius: 20),
+              color: Colors.blueGrey.shade50,
+              child: Row(
+                children: [
+                  SizedBox(width: 20),
+                  Icon(CupertinoIcons.search),
+                  SizedBox(width: 10),
+                  Text("Search")
+                ],
               ),
-            )),
+            ),
+          ),
+        ),
         SliverList(
           delegate: SliverChildListDelegate(
             [
               Consumer<CustomerHomeBloc>(builder: (context, value, _) {
                 return Container(
-                  height: 330,
+                  height: 420,
                   child: PageView.builder(
                     scrollDirection: Axis.horizontal,
                     physics: BouncingScrollPhysics(),
@@ -586,9 +802,8 @@ class _HomeLandingState extends State<HomeLanding> {
                     delegate: SliverChildListDelegate(
                       value.trendingList
                           .mapIndex(
-                            (e, i) => HomeServiceTile(
+                            (e, i) => HomeServiceTile2(
                               serviceItem: e,
-                              heroTag: "service_details$i",
                             ),
                           )
                           .toList(),
@@ -635,110 +850,176 @@ class HomeCaroselTile extends StatefulWidget {
 class _HomeCaroselTileState extends State<HomeCaroselTile> {
   @override
   Widget build(BuildContext context) {
-    return Hero(
-      tag: widget.heroTag,
-      child: Container(
-        margin: EdgeInsets.all(
-          20,
-        ),
+    return Container(
+      margin: EdgeInsets.all(20),
+      child: Padding(
+        padding: const EdgeInsets.all(1.0),
         child: Material(
+          elevation: 6,
+          shadowColor: Colors.blueGrey.shade50.withOpacity(0.5),
           clipBehavior: Clip.antiAlias,
-          color: Color(widget.serviceItem.color).withOpacity(0.2),
-          shape: SquircleBorder(radius: 50),
+          color: Colors.blueGrey.shade50,
+          shape: SquircleBorder(radius: 30),
           child: InkWell(
-            splashColor: Color(widget.serviceItem.color).withOpacity(0.1),
+            splashColor: Colors.white24,
             onTap: () {
               Navigator.push(
                 context,
                 PageRouteBuilder(
                   pageBuilder: (context, animation, animation2) {
-                    return ServiceDetailsView(
-                      serviceItem: widget.serviceItem,
-                      heroTag: widget.heroTag,
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                                begin: Offset(0, 1), end: Offset(0, 0))
+                            .chain(CurveTween(
+                              curve: Curves.easeInOutCirc,
+                            ))
+                            .animate(animation),
+                        child: ServiceDetailsView(
+                          serviceItem: widget.serviceItem,
+                        ),
+                      ),
                     );
                   },
                 ),
               );
             },
-            child: Stack(
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
               children: [
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: Container(
-                    height: MediaQuery.of(context).size.width / 1.8,
-                    width: MediaQuery.of(context).size.width / 1.8,
-                    child: CachedNetworkImage(
-                      imageUrl: widget.serviceItem.imageURL,
-                      alignment: Alignment.bottomRight,
-                      filterQuality: FilterQuality.high,
-                      fit: BoxFit.contain,
+                Padding(
+                  padding: const EdgeInsets.all(2),
+                  child: Material(
+                    clipBehavior: Clip.antiAlias,
+                    shape: SquircleBorder(radius: 30),
+                    child: Container(
+                      height: 260,
+                      width: MediaQuery.of(context).size.width,
+                      child: CachedNetworkImage(
+                        imageUrl: widget.serviceItem.imageURLs[0],
+                        alignment: Alignment.bottomCenter,
+                        filterQuality: FilterQuality.high,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 30),
-                        child: Text(
-                          widget.serviceItem.name,
-                          maxLines: 2,
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900,
-                            color: Color(widget.serviceItem.color),
-                          ),
-                        ),
-                      ),
-                      Container(
-                        width: MediaQuery.of(context).size.width / 2.8,
-                        padding: EdgeInsets.symmetric(vertical: 10),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.serviceItem.detailText,
-                              textAlign: TextAlign.start,
-                              maxLines: 8,
-                              style: TextStyle(
-                                shadows: [
-                                  Shadow(
-                                    blurRadius: 3,
-                                    color: Colors.white,
-                                  )
-                                ],
-                                color: Color(widget.serviceItem.color),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Material(
-                              shape: SquircleBorder(radius: 30),
-                              color: Color(widget.serviceItem.color),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 15.0, horizontal: 15.0),
-                                child: Center(
-                                  child: Text(
-                                    "Book Service",
-                                    style: TextStyle(color: Colors.white),
+                Expanded(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 20),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    widget.serviceItem.type,
+                                    maxLines: 2,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.blueGrey.shade300,
+                                    ),
                                   ),
-                                ),
+                                  Container(
+                                    width:
+                                        MediaQuery.of(context).size.width / 1.8,
+                                    padding: EdgeInsets.symmetric(vertical: 5),
+                                    child: Text(
+                                      widget.serviceItem.name,
+                                      textAlign: TextAlign.start,
+                                      maxLines: 2,
+                                      style: TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w900,
+                                        color: Colors.blueGrey.shade800,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
+                              Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "\$${widget.serviceItem.cost}",
+                                    textAlign: TextAlign.start,
+                                    style: TextStyle(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blueGrey.shade700,
+                                    ),
+                                  ),
+                                  Consumer<CartBloc>(
+                                      builder: (context, value, _) {
+                                    return GestureDetector(
+                                      onTap: () async {
+                                        bool result =
+                                            value.addtocart(widget.serviceItem);
+                                        showSimpleNotification(
+                                          Text(
+                                            result
+                                                ? "${widget.serviceItem.name} already present in cart."
+                                                : "${widget.serviceItem.name} added to cart.",
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        margin: EdgeInsets.only(top: 5),
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 20.0, vertical: 8.0),
+                                        decoration: BoxDecoration(
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black12,
+                                              blurRadius: 10,
+                                            )
+                                          ],
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(30),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              CustomFilledIcons
+                                                  .fi_sr_shopping_bag_add,
+                                              size: 16,
+                                              color: Colors.blueGrey,
+                                            ),
+                                            SizedBox(width: 8),
+                                            Text(
+                                              "Add",
+                                              textAlign: TextAlign.start,
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w900,
+                                                color: Colors.blueGrey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -770,20 +1051,29 @@ class _HomeServicesState extends State<HomeServices> {
               background: Container(
                 height: 160,
                 decoration: BoxDecoration(
-                  color: Color(0xfffff8f5),
+                  color: Colors.blueAccent.shade100,
                 ),
                 child: Stack(
                   children: [
+                    Align(
+                      alignment: Alignment(1.2, 2),
+                      child: Icon(
+                        CustomFilledIcons.fi_sr_asterisk,
+                        size: 150,
+                        color: Colors.white54,
+                      ),
+                    ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          SizedBox(height: 40),
                           Text(
                             "Browse",
                             style: TextStyle(
-                                color: Colors.grey.shade700,
+                                color: Colors.black87,
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold),
                           ),
@@ -797,7 +1087,7 @@ class _HomeServicesState extends State<HomeServices> {
                           Text(
                             "All the best in-class services at your finger tips.",
                             style: TextStyle(
-                                color: Colors.grey,
+                                color: Colors.black87,
                                 fontWeight: FontWeight.bold),
                           ),
                         ],
@@ -855,7 +1145,7 @@ class _HomeServicesState extends State<HomeServices> {
                         title: "Waxing Services",
                         iconData: ServicesIcons.wax,
                       ),
-                      SizedBox(width: 10),
+                      SizedBox(width: 20),
                     ],
                   ),
                 ),
@@ -866,12 +1156,12 @@ class _HomeServicesState extends State<HomeServices> {
         Consumer<CustomerHomeBloc>(builder: (context, value, _) {
           return SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.only(top: 20, left: 20, bottom: 10),
+              padding: const EdgeInsets.only(top: 20, left: 20, bottom: 15),
               child: Text(
                 "Select your favorite ${value.filterTitle.toLowerCase()} service.",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Colors.blueAccent,
+                  color: Colors.black,
                   fontSize: 18,
                 ),
               ),
@@ -887,27 +1177,12 @@ class _HomeServicesState extends State<HomeServices> {
                     alignment: Alignment.center,
                     height: 220,
                     width: MediaQuery.of(context).size.width,
-                    child: Material(
-                      elevation: 1,
-                      shape: SquircleBorder(radius: 50),
-                      child: Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              height: 160,
-                              width: 160,
-                              child: Image.asset("assets/nothing.png"),
-                            ),
-                            Text(
-                              "Nothing found here!",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey),
-                            ),
-                          ],
-                        ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Container(
+                        height: 160,
+                        width: 160,
+                        child: Image.asset("assets/nothing.png"),
                       ),
                     ),
                   ),
@@ -920,7 +1195,6 @@ class _HomeServicesState extends State<HomeServices> {
                         .mapIndex(
                           (e, i) => HomeServiceTile(
                             serviceItem: e,
-                            heroTag: "service_details$i",
                           ),
                         )
                         .toList()),
@@ -967,7 +1241,6 @@ class HomeServiceFilter extends StatelessWidget {
         margin: EdgeInsets.only(left: 15.0),
         height: 60,
         child: Material(
-          type: MaterialType.transparency,
           clipBehavior: Clip.antiAlias,
           shape: SquircleBorder(radius: 40),
           child: InkWell(
@@ -1035,61 +1308,243 @@ class HomeServiceFilter extends StatelessWidget {
 class HomeCart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      physics: BouncingScrollPhysics(),
-      slivers: [
-        SliverAppBar(
-            backgroundColor: Colors.white,
-            stretch: true,
-            expandedHeight: 160,
-            elevation: 1,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                height: 160,
-                decoration: BoxDecoration(
-                  color: Color(0xfffff8f5),
-                ),
-                child: Stack(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Cart",
-                            style: TextStyle(
+    return Stack(
+      children: [
+        CustomScrollView(
+          physics: BouncingScrollPhysics(),
+          slivers: [
+            SliverAppBar(
+              backgroundColor: Colors.white,
+              stretch: true,
+              expandedHeight: 160,
+              elevation: 1,
+              flexibleSpace: FlexibleSpaceBar(
+                background: Container(
+                  height: 160,
+                  decoration: BoxDecoration(
+                    color: Colors.blueAccent.shade100,
+                  ),
+                  child: Stack(
+                    children: [
+                      Align(
+                        alignment: Alignment(1.2, 2),
+                        child: Icon(
+                          CustomFilledIcons.fi_sr_shopping_bag,
+                          size: 150,
+                          color: Colors.white54,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 40),
+                            Text(
+                              "Cart",
+                              style: TextStyle(
                                 color: Colors.black,
                                 fontSize: 36,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            "Welcome, What service would you like to try today?",
-                            style: TextStyle(
-                                color: Colors.grey,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ],
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              "We'd love to give our best services just add them in here.",
+                              style: TextStyle(
+                                color: Colors.black87,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            )),
-        Consumer<CartBloc>(builder: (context, value, _) {
-          return SliverList(
-            delegate: SliverChildListDelegate(value.cartItems
-                .map((item) => QuickServiceTile(serviceItem: item))
-                .toList()),
-          );
-        }),
+            ),
+            Consumer<CartBloc>(builder: (context, value, _) {
+              if (value.cartItems.isNotEmpty) {
+                return SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Total Cost",
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blueGrey.shade700,
+                              ),
+                            ),
+                            AnimatedSwitcher(
+                              duration: Duration(milliseconds: 400),
+                              reverseDuration: Duration(milliseconds: 10),
+                              transitionBuilder: (child, animation) =>
+                                  SlideTransition(
+                                position: Tween<Offset>(
+                                  begin: Offset(0.5, 0),
+                                  end: Offset(0, 0),
+                                )
+                                    .chain(
+                                        CurveTween(curve: Curves.easeOutCirc))
+                                    .animate(animation),
+                                child: child,
+                              ),
+                              child: Text(
+                                "\$${value.totalCost.toString()}",
+                                key: ValueKey(value.totalCost),
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.blueGrey.shade700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Total Duration",
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blueGrey.shade700,
+                              ),
+                            ),
+                            AnimatedSwitcher(
+                              duration: Duration(milliseconds: 400),
+                              reverseDuration: Duration(milliseconds: 10),
+                              transitionBuilder: (child, animation) =>
+                                  SlideTransition(
+                                position: Tween<Offset>(
+                                  begin: Offset(0.5, 0),
+                                  end: Offset(0, 0),
+                                )
+                                    .chain(
+                                        CurveTween(curve: Curves.easeOutCirc))
+                                    .animate(animation),
+                                child: child,
+                              ),
+                              child: Text(
+                                value.durationToString(
+                                    value.totalSlotsRequired * 15),
+                                key: ValueKey(value.totalSlotsRequired),
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.blueGrey.shade700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              } else
+                return SliverToBoxAdapter(
+                  child: Container(),
+                );
+            }),
+            Consumer<CartBloc>(builder: (context, value, _) {
+              if (value.cartItems.isNotEmpty) {
+                return SliverList(
+                  delegate: SliverChildListDelegate(value.cartItems
+                      .map((item) => QuickServiceTile(serviceItem: item))
+                      .toList()),
+                );
+              } else {
+                return SliverToBoxAdapter(
+                  child: Container(
+                    alignment: Alignment.center,
+                    height: 500,
+                    width: MediaQuery.of(context).size.width,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          height: 230,
+                          width: 230,
+                          child: Image.asset("assets/nothing.png"),
+                        ),
+                        Text(
+                          "Services you'll add to cart will appear here.",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blueGrey,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              }
+            }),
+            SliverToBoxAdapter(child: SizedBox(height: 150))
+          ],
+        ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 70, left: 10, right: 10),
+            child: Row(
+              children: [
+                Consumer<CartBloc>(builder: (context, value, _) {
+                  if (value.cartItems.isNotEmpty) {
+                    return Button2(
+                      title: "Proceed to Booking",
+                      titleColor: Colors.white,
+                      iconData: Icons.arrow_forward_rounded,
+                      backgroundColor: value.cartItems.isNotEmpty
+                          ? Colors.blueAccent
+                          : Colors.grey.shade300,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          PageRouteBuilder(
+                            opaque: false,
+                            pageBuilder: (BuildContext context, animation,
+                                secondartAnimation) {
+                              return SlideTransition(
+                                position: Tween<Offset>(
+                                  begin: Offset(0, 1),
+                                  end: Offset(0, 0),
+                                )
+                                    .chain(
+                                      CurveTween(curve: Curves.decelerate),
+                                    )
+                                    .animate(animation),
+                                child: ChangeNotifierProvider(
+                                    create: (context) => BookingScreenBloc(),
+                                    child: BookServiceScreen()),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    );
+                  } else
+                    return Container();
+                }),
+              ],
+            ),
+          ),
+        )
       ],
     );
   }
 }
 
-class HomeProfile extends StatelessWidget {
+class HomeMyReservations extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
@@ -1104,27 +1559,36 @@ class HomeProfile extends StatelessWidget {
               background: Container(
                 height: 160,
                 decoration: BoxDecoration(
-                  color: Color(0xfffff8f5),
+                  color: Colors.blueAccent.shade100,
                 ),
                 child: Stack(
                   children: [
+                    Align(
+                      alignment: Alignment(1.2, 2),
+                      child: Icon(
+                        CustomFilledIcons.fi_sr_receipt,
+                        size: 150,
+                        color: Colors.white54,
+                      ),
+                    ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          SizedBox(height: 40),
                           Text(
-                            "Hi, Ahmed",
+                            "My Reservations",
                             style: TextStyle(
                                 color: Colors.black,
                                 fontSize: 36,
                                 fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            "Welcome, What service would you like to try today?",
+                            "All of your reservations in one place.",
                             style: TextStyle(
-                                color: Colors.grey,
+                                color: Colors.black87,
                                 fontWeight: FontWeight.bold),
                           ),
                         ],
@@ -1150,8 +1614,82 @@ class HomeProfile extends StatelessWidget {
                       height: MediaQuery.of(context).size.width - 100,
                       width: MediaQuery.of(context).size.width - 100,
                       child: Material(
-                        color: Color(0xfff6e7d6),
+                        color: Colors.blueGrey.shade50,
                         shape: SquircleBorder(radius: 50),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Stack(
+                            children: [
+                              Container(
+                                width: MediaQuery.of(context).size.width - 40,
+                                height: 50,
+                                color: Colors.amber,
+                                child: Stack(
+                                  children: [],
+                                ),
+                              ),
+                              Align(
+                                alignment: Alignment.topCenter,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          "Reservation Date",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.blueGrey,
+                                          ),
+                                        ),
+                                        Text(
+                                          "Feburary 20, 2021",
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w900,
+                                            color: Colors.blueGrey.shade700,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Container(
+                                      height: 40,
+                                      width: 1,
+                                      margin:
+                                          EdgeInsets.symmetric(horizontal: 15),
+                                      color: Colors.blueGrey,
+                                    ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "Time",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.blueGrey,
+                                          ),
+                                        ),
+                                        Text(
+                                          "10 : 00 AM ",
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w900,
+                                            color: Colors.blueGrey.shade700,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
                       ),
                     );
                   },
@@ -1181,12 +1719,10 @@ extension ExtendedIterable<E> on Iterable<E> {
 
 class ServiceDetailsView extends StatefulWidget {
   final ServiceItem serviceItem;
-  final String heroTag;
 
   const ServiceDetailsView({
     Key key,
     @required this.serviceItem,
-    @required this.heroTag,
   }) : super(key: key);
   @override
   _ServiceDetailsViewState createState() => _ServiceDetailsViewState();
@@ -1195,352 +1731,398 @@ class ServiceDetailsView extends StatefulWidget {
 class _ServiceDetailsViewState extends State<ServiceDetailsView> {
   @override
   Widget build(BuildContext context) {
-    return Hero(
-      tag: widget.heroTag,
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: Stack(
-          children: [
-            CustomScrollView(
-              physics: BouncingScrollPhysics(),
-              slivers: [
-                SliverAppBar(
-                  leading: CloseButton(),
-                  backgroundColor: Color(widget.serviceItem.color),
-                  expandedHeight: MediaQuery.of(context).size.width,
-                  elevation: 1,
-                  stretch: true,
-                  pinned: true,
-                  flexibleSpace: FlexibleSpaceBar(
-                    background: Container(
-                      height: MediaQuery.of(context).size.width,
-                      decoration: BoxDecoration(
-                        color: Color(widget.serviceItem.color),
-                      ),
-                      child: Stack(
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Stack(
+        children: [
+          CustomScrollView(
+            physics: BouncingScrollPhysics(),
+            slivers: [
+              SliverAppBar(
+                leading: CloseButton(),
+                backgroundColor: Colors.white,
+                expandedHeight: 300,
+                elevation: 1,
+                stretch: true,
+                pinned: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Container(
+                    height: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                      color: Colors.blueGrey,
+                    ),
+                    child: Stack(
+                      children: [
+                        PageView.builder(
+                          itemBuilder: (context, index) {
+                            String image = widget.serviceItem.imageURLs[index];
+                            return CachedNetworkImage(
+                              imageUrl: image,
+                              alignment: Alignment.center,
+                              fit: BoxFit.cover,
+                            );
+                          },
+                          itemCount: widget.serviceItem.imageURLs.length,
+                          physics: BouncingScrollPhysics(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  [
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          PageView.builder(
-                            itemBuilder: (context, index) {
-                              return CachedNetworkImage(
-                                imageUrl: widget.serviceItem.imageURL,
-                                alignment: Alignment.center,
-                                fit: BoxFit.cover,
-                                height: 145,
-                                width: 88,
-                              );
-                            },
-                            itemCount: 10,
-                            physics: BouncingScrollPhysics(),
+                          Expanded(
+                            child: Container(
+                              child: Text(
+                                widget.serviceItem.name,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 28,
+                                  color: Colors.blueGrey.shade700,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 5),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 10),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(50),
+                              color: Colors.blueGrey,
+                            ),
+                            child: Text(
+                              widget.serviceItem.category == "Banner"
+                                  ? "Best"
+                                  : widget.serviceItem.category,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                ),
-                SliverList(
-                  delegate: SliverChildListDelegate(
-                    [
-                      Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Container(
-                                child: Text(
-                                  widget.serviceItem.name,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 28,
-                                    color: Color(widget.serviceItem.color),
+                    Divider(
+                      color: Colors.blueGrey.shade50,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Material(
+                                color: Colors.blueGrey.withOpacity(0.1),
+                                shape: SquircleBorder(radius: 40),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(15),
+                                  child: Icon(
+                                    CustomFilledIcons.fi_sr_dollar,
+                                    color: Colors.blueGrey,
                                   ),
                                 ),
                               ),
-                            ),
-                            SizedBox(width: 5),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 10),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(50),
-                                color: Color(widget.serviceItem.color),
-                              ),
-                              child: Text(
-                                widget.serviceItem.category == "Banner"
-                                    ? "Best"
-                                    : widget.serviceItem.category,
+                              SizedBox(width: 10),
+                              Text(
+                                "Service Price",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 18,
-                                  color: Colors.white,
+                                  color: Colors.grey.shade900,
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Divider(
-                        color: Color(widget.serviceItem.color).withOpacity(0.5),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 10),
-                        child: Material(
-                          color:
-                              Color(widget.serviceItem.color).withOpacity(0.1),
-                          shape: SquircleBorder(radius: 40),
-                          child: Padding(
-                            padding: const EdgeInsets.all(15),
-                            child: Text(
-                              widget.serviceItem.detailText,
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Color(widget.serviceItem.color),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.blueGrey.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(40),
+                                ),
+                                padding: const EdgeInsets.all(15),
+                                child: Text(
+                                  "\$${widget.serviceItem.cost}",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    color: Colors.blueGrey.shade700,
+                                  ),
+                                ),
                               ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Material(
+                                color: Colors.blueGrey.withOpacity(0.1),
+                                shape: SquircleBorder(radius: 40),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(15),
+                                  child: Icon(CustomFilledIcons.fi_sr_stopwatch,
+                                      color: Colors.blueGrey),
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Text(
+                                "Time Required",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  color: Colors.grey.shade900,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.blueGrey.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(40),
+                                ),
+                                padding: const EdgeInsets.all(15),
+                                child: Text(
+                                  "${widget.serviceItem.timeRequired.toString()} Minutes",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    color: Colors.blueGrey.shade700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Material(
+                                color: Colors.blueGrey.withOpacity(0.1),
+                                shape: SquircleBorder(radius: 40),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(15),
+                                  child: Icon(
+                                    CustomFilledIcons.fi_sr_badge,
+                                    color: Colors.blueGrey,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Text(
+                                "Service Type",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  color: Colors.grey.shade900,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(width: 10),
+                          Row(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.blueGrey.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(40),
+                                ),
+                                padding: const EdgeInsets.all(15),
+                                child: Text(
+                                  widget.serviceItem.type,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    color: Colors.blueGrey.shade700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Divider(
+                      color: Colors.blueGrey.shade50,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
+                      child: Material(
+                        color: Colors.blueGrey.withOpacity(0.1),
+                        shape: SquircleBorder(radius: 40),
+                        child: Padding(
+                          padding: const EdgeInsets.all(15),
+                          child: Text(
+                            widget.serviceItem.detailText,
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.blueGrey.shade700,
                             ),
                           ),
                         ),
                       ),
-                      Divider(
-                        color: Color(widget.serviceItem.color).withOpacity(0.5),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Material(
-                                  color: Color(widget.serviceItem.color)
-                                      .withOpacity(0.1),
-                                  shape: SquircleBorder(radius: 40),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(15),
-                                    child: Icon(CustomFilledIcons.fi_sr_dollar,
-                                        color: Color(widget.serviceItem.color)),
-                                  ),
-                                ),
-                                SizedBox(width: 10),
-                                Text(
-                                  "Service Price",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                    color: Colors.grey.shade900,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: Color(widget.serviceItem.color)
-                                        .withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(40),
-                                  ),
-                                  padding: const EdgeInsets.all(15),
-                                  child: Text(
-                                    "\$${widget.serviceItem.cost}",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18,
-                                      color: Color(widget.serviceItem.color),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Material(
-                                  color: Color(widget.serviceItem.color)
-                                      .withOpacity(0.1),
-                                  shape: SquircleBorder(radius: 40),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(15),
-                                    child: Icon(
-                                        CustomFilledIcons.fi_sr_stopwatch,
-                                        color: Color(widget.serviceItem.color)),
-                                  ),
-                                ),
-                                SizedBox(width: 10),
-                                Text(
-                                  "Time Required",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                    color: Colors.grey.shade900,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: Color(widget.serviceItem.color)
-                                        .withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(40),
-                                  ),
-                                  padding: const EdgeInsets.all(15),
-                                  child: Text(
-                                    "${widget.serviceItem.timeRequired.toString()} Minutes",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18,
-                                      color: Color(widget.serviceItem.color),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Material(
-                                  color: Color(widget.serviceItem.color)
-                                      .withOpacity(0.1),
-                                  shape: SquircleBorder(radius: 40),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(15),
-                                    child: Icon(
-                                      CustomFilledIcons.fi_sr_badge,
-                                      color: Color(widget.serviceItem.color),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(width: 10),
-                                Text(
-                                  "Service Type",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                    color: Colors.grey.shade900,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(width: 10),
-                            Row(
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: Color(widget.serviceItem.color)
-                                        .withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(40),
-                                  ),
-                                  padding: const EdgeInsets.all(15),
-                                  child: Text(
-                                    widget.serviceItem.type,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18,
-                                      color: Color(widget.serviceItem.color),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        height: 200,
-                      ),
-                    ],
-                  ),
+                    ),
+                    Container(
+                      height: 200,
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                margin: EdgeInsets.all(20),
-                height: 70,
-                width: MediaQuery.of(context).size.width,
-                child: Material(
-                  shape: SquircleBorder(radius: 40),
-                  clipBehavior: Clip.antiAlias,
-                  color: Colors.transparent,
-                  child: Consumer<CartBloc>(builder: (context, cartbloc, _) {
-                    return Row(
-                      children: [
-                        Expanded(
-                          child: InkWell(
-                            splashColor: Color(widget.serviceItem.color)
-                                .withOpacity(0.1),
+              ),
+            ],
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              margin: EdgeInsets.all(20),
+              height: 70,
+              width: MediaQuery.of(context).size.width,
+              child: Material(
+                elevation: 8,
+                shape: SquircleBorder(radius: 20),
+                clipBehavior: Clip.antiAlias,
+                color: Colors.transparent,
+                child: Consumer<CartBloc>(builder: (context, cartbloc, _) {
+                  return Row(
+                    children: [
+                      Expanded(
+                        child: Consumer<CartBloc>(builder: (context, value, _) {
+                          return InkWell(
+                            splashColor: Colors.white24,
                             onTap: () {
-                              cartbloc.addtocart(widget.serviceItem);
+                              bool result = value.addtocart(widget.serviceItem);
+                              showSimpleNotification(
+                                Text(
+                                  result
+                                      ? "${widget.serviceItem.name} already present in cart."
+                                      : "${widget.serviceItem.name} added to cart.",
+                                ),
+                              );
+
+                              Navigator.push(
+                                context,
+                                PageRouteBuilder(
+                                  opaque: false,
+                                  pageBuilder: (BuildContext context, animation,
+                                      secondartAnimation) {
+                                    return SlideTransition(
+                                      position: Tween<Offset>(
+                                        begin: Offset(0, 1),
+                                        end: Offset(0, 0),
+                                      )
+                                          .chain(
+                                            CurveTween(
+                                                curve: Curves.decelerate),
+                                          )
+                                          .animate(animation),
+                                      child: ChangeNotifierProvider(
+                                          create: (context) =>
+                                              BookingScreenBloc(),
+                                          child: BookServiceScreen()),
+                                    );
+                                  },
+                                ),
+                              );
                             },
                             child: Container(
                               alignment: Alignment.center,
                               height: 70,
-                              color: Color(widget.serviceItem.color)
-                                  .withOpacity(0.3),
+                              color: Colors.blueAccent,
                               child: Text(
                                 "Book Now",
                                 style: TextStyle(
-                                  fontSize: 22,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(widget.serviceItem.color),
+                                  color: Colors.white,
                                 ),
                               ),
                             ),
-                          ),
-                        ),
-                        InkWell(
-                          splashColor:
-                              Color(widget.serviceItem.color).withOpacity(0.7),
+                          );
+                        }),
+                      ),
+                      Consumer<CartBloc>(builder: (context, value, _) {
+                        return InkWell(
+                          splashColor: Colors.red,
                           onTap: () {
-                            String message =
-                                cartbloc.addtocart(widget.serviceItem);
-                            Fluttertoast.showToast(msg: message);
+                            bool result = value.addtocart(widget.serviceItem);
+                            showSimpleNotification(
+                              Text(
+                                result
+                                    ? "${widget.serviceItem.name} already present in cart."
+                                    : "${widget.serviceItem.name} added to cart.",
+                              ),
+                            );
                           },
                           child: Container(
                             width: 150,
                             height: 70,
                             alignment: Alignment.center,
-                            color: Color(widget.serviceItem.color)
-                                .withOpacity(0.7),
+                            color: Colors.blueAccent.shade100,
                             child: Text(
                               "Add to Cart",
                               style: TextStyle(
-                                fontSize: 22,
+                                fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
                             ),
                           ),
-                        )
-                      ],
-                    );
-                  }),
-                ),
+                        );
+                      })
+                    ],
+                  );
+                }),
               ),
-            )
-          ],
-        ),
+            ),
+          )
+        ],
       ),
     );
   }
+}
+
+Color darken(Color color, [double amount = .1]) {
+  assert(amount >= 0 && amount <= 1);
+
+  final hsl = HSLColor.fromColor(color);
+  final hslDark = hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0));
+
+  return hslDark.toColor();
+}
+
+Color lighten(Color color, [double amount = .1]) {
+  assert(amount >= 0 && amount <= 1);
+
+  final hsl = HSLColor.fromColor(color);
+  final hslLight = hsl.withLightness((hsl.lightness + amount).clamp(0.0, 1.0));
+
+  return hslLight.toColor();
 }

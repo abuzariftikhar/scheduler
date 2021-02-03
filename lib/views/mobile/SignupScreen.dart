@@ -1,8 +1,12 @@
 import 'package:cupertino_rounded_corners/cupertino_rounded_corners.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
+import 'package:scheduler/blocs/AuthenticationBloc.dart';
 import 'package:scheduler/views/mobile/SigninScreen.dart';
+import 'package:scheduler/widgets/custom_icons_icons.dart';
+
+import 'HomeScreen.dart';
 
 class SignUp extends StatelessWidget {
   @override
@@ -13,25 +17,12 @@ class SignUp extends StatelessWidget {
     final FocusNode _nameFocus = FocusNode();
     final FocusNode _emailFocus = FocusNode();
     final FocusNode _passwordFocus = FocusNode();
-    bool obscureText = true;
 
     return Scaffold(
         backgroundColor: Colors.white,
         body: Stack(
           children: [
-            GestureDetector(
-              onTap: () {
-                FocusScopeNode currentFocus = FocusScope.of(context);
-                if (!currentFocus.hasPrimaryFocus) {
-                  currentFocus.unfocus();
-                }
-              },
-              child: Container(
-                color: Colors.white,
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-              ),
-            ),
+            
             Align(
                 alignment: Alignment.bottomCenter,
                 child: Padding(
@@ -88,48 +79,26 @@ class SignUp extends StatelessWidget {
                     ),
                   ),
                 ),
-                AnimatedContainer(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  margin: EdgeInsets.symmetric(horizontal: 30, vertical: 8),
-                  alignment: Alignment.center,
-                  height: 65,
-                  width: MediaQuery.of(context).size.width,
-                  duration: Duration(milliseconds: 300),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  child: TextField(
-                    focusNode: _nameFocus,
-                    controller: nameController,
-                    keyboardType: TextInputType.name,
-                    textInputAction: TextInputAction.next,
-                    decoration: InputDecoration(
-                      focusColor: Colors.blue,
-                      labelText: 'Full Name',
-                      hintText: 'John Doe',
-                      border: InputBorder.none,
-                    ),
-                  ),
-                ),
                 Container(
                   margin: EdgeInsets.symmetric(horizontal: 30, vertical: 8),
                   alignment: Alignment.center,
-                  height: 65,
                   width: MediaQuery.of(context).size.width,
                   child: Material(
                     color: Colors.blueGrey.shade50,
-                    shape: SquircleBorder(radius: 30),
+                    shape: SquircleBorder(radius: 20),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 8),
                       child: TextField(
-                        focusNode: _emailFocus,
-                        controller: emailController,
-                        keyboardType: TextInputType.emailAddress,
+                        textAlignVertical: TextAlignVertical.center,
+                        focusNode: _nameFocus,
+                        controller: nameController,
+                        keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         decoration: InputDecoration(
-                          labelText: 'Email',
-                          hintText: 'example@domain.com',
+                          prefixIcon: Icon(CustomIcons.fi_rr_id_badge),
+                          focusColor: Colors.blue,
+                          hintText: 'Full Name',
                           border: InputBorder.none,
                         ),
                       ),
@@ -139,22 +108,47 @@ class SignUp extends StatelessWidget {
                 Container(
                   margin: EdgeInsets.symmetric(horizontal: 30, vertical: 8),
                   alignment: Alignment.center,
-                  height: 65,
                   width: MediaQuery.of(context).size.width,
                   child: Material(
                     color: Colors.blueGrey.shade50,
-                    shape: SquircleBorder(radius: 30),
+                    shape: SquircleBorder(radius: 20),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 8),
+                      child: TextField(
+                        focusNode: _emailFocus,
+                        controller: emailController,
+                        textAlignVertical: TextAlignVertical.center,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(CustomIcons.fi_rr_portrait),
+                          hintText: 'Email',
+                          border: InputBorder.none,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.symmetric(horizontal: 30, vertical: 8),
+                  alignment: Alignment.center,
+                  width: MediaQuery.of(context).size.width,
+                  child: Material(
+                    color: Colors.blueGrey.shade50,
+                    shape: SquircleBorder(radius: 20),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 8),
                       child: TextField(
                         focusNode: _passwordFocus,
                         controller: passwordController,
                         keyboardType: TextInputType.visiblePassword,
                         textInputAction: TextInputAction.go,
-                        obscureText: obscureText,
+                        obscureText: true,
                         decoration: InputDecoration(
-                          labelText: 'Password',
-                          hintText: 'More than 6 characters',
+                          prefixIcon: Icon(CustomIcons.fi_rr_lock),
+                          hintText: 'Password',
                           border: InputBorder.none,
                         ),
                       ),
@@ -167,25 +161,50 @@ class SignUp extends StatelessWidget {
                   child: Row(
                     children: [
                       Expanded(
-                        child: CupertinoButton.filled(
-                          child: Text('Sign up'),
-                          onPressed: () async {
-                            Fluttertoast.showToast(
-                              msg: "message",
-                              toastLength: Toast.LENGTH_SHORT,
-                              gravity: ToastGravity.BOTTOM,
-                              timeInSecForIosWeb: 1,
-                              backgroundColor: Colors.grey.shade200,
-                              textColor: Colors.grey.shade600,
-                            );
-                          },
-                        ),
+                        child: Consumer<AuthenticationBloc>(
+                            builder: (context, value, _) {
+                          return CupertinoButton.filled(
+                            child: Text('Sign up'),
+                            onPressed: () async {
+                              bool successful =
+                                  await value.registerWithEmailAndPassword(
+                                emailController.text,
+                                passwordController.text,
+                                nameController.text,
+                              );
+                              if (successful) {
+                                Navigator.pushReplacement(context,
+                                    PageRouteBuilder(pageBuilder:
+                                        (context, animation, animation2) {
+                                  return FadeTransition(
+                                    opacity: animation,
+                                    child: HomeScreen(
+                                      adminMode: false,
+                                    ),
+                                  );
+                                }));
+                              }
+                            },
+                          );
+                        }),
                       ),
                     ],
                   ),
                 ),
               ],
-            )
+            ),
+            Consumer<AuthenticationBloc>(builder: (context, value, _) {
+            if (value.isBusy) {
+              return Container(
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                color: Colors.white24,
+                child: Center(child: CircularProgressIndicator()),
+              );
+            } else {
+              return Container();
+            }
+          }),
           ],
         ));
   }

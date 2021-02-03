@@ -40,7 +40,7 @@ class _ServiceDetailsScreenState extends State<ServiceDetailsScreen> {
                     expandedHeight: MediaQuery.of(context).size.width / 1.2,
                     flexibleSpace: FlexibleSpaceBar(
                       background: Image.network(
-                        widget.serviceModel.imageURL,
+                        widget.serviceModel.imageURLs[0],
                         alignment: Alignment.topCenter,
                         fit: BoxFit.scaleDown,
                         height: double.maxFinite,
@@ -107,16 +107,14 @@ class _ServiceDetailsScreenState extends State<ServiceDetailsScreen> {
                 child: Consumer<CartBloc>(builder: (context, value, _) {
                   return GestureDetector(
                     onTap: () {
-                      String message = value.addtocart(widget.serviceModel);
-                      Fluttertoast.showToast(
-                        msg: message,
-                        toastLength: Toast.LENGTH_SHORT,
-                        gravity: ToastGravity.BOTTOM,
-                        timeInSecForIosWeb: 1,
-                        backgroundColor: Colors.grey.shade200,
-                        textColor: Colors.grey.shade600,
-                      );
-                      print(value.cartItems.length);
+                      String msg;
+                      if (value.cartItems.contains(widget.serviceModel)) {
+                        msg = "Item already present in cart";
+                      } else {
+                        value.addtocart(widget.serviceModel);
+                        msg = "Item added to cart";
+                      }
+                      Fluttertoast.showToast(msg: msg);
                     },
                     child: Row(
                       children: [

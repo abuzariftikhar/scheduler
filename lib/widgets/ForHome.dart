@@ -219,7 +219,7 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
         filter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
         child: Container(
           height: 60,
-          color: Colors.white24,
+          color: Colors.white54,
           width: MediaQuery.of(context).size.width,
           child: Material(
             clipBehavior: Clip.none,
@@ -247,9 +247,9 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
                   index: 2,
                 ),
                 BBarIcon(
-                  title: "Profile",
-                  iconData: CustomIcons.fi_rr_portrait,
-                  selectedIcon: CustomFilledIcons.fi_sr_portrait,
+                  title: "Reservations",
+                  iconData: CustomIcons.fi_rr_notebook,
+                  selectedIcon: CustomFilledIcons.fi_sr_notebook,
                   index: 3,
                 ),
               ],
@@ -285,6 +285,7 @@ class _BBarIconState extends State<BBarIcon> {
       child: Consumer<CustomerHomeBloc>(builder: (context, value, _) {
         return InkResponse(
           onTap: () {
+            value.previousIndex = value.index;
             value.index = widget.index;
             value.update();
           },
@@ -312,7 +313,7 @@ class _BBarIconState extends State<BBarIcon> {
                 widget.title,
                 style: TextStyle(
                   color: widget.index == value.index
-                      ? Colors.blueAccent.shade700
+                      ? Colors.blueAccent
                       : Colors.grey,
                 ),
               )

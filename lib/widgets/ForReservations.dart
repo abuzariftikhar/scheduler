@@ -1,7 +1,7 @@
 import 'package:cupertino_rounded_corners/cupertino_rounded_corners.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:scheduler/blocs/ReservationsBloc.dart';
+import 'package:scheduler/blocs/for_admin/AppointmentsBloc.dart';
 
 class HeaderTile extends StatefulWidget {
   final int index;

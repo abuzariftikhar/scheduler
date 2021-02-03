@@ -1,6 +1,8 @@
 import 'dart:ui';
 
+import 'package:cupertino_rounded_corners/cupertino_rounded_corners.dart';
 import 'package:flutter/material.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:provider/provider.dart';
 import 'package:scheduler/blocs/CartBloc.dart';
 import 'package:scheduler/models/ServiceModel.dart';
@@ -104,57 +106,76 @@ class _QuickServiceTileState extends State<QuickServiceTile> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 90,
       margin: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-      padding: EdgeInsets.symmetric(vertical: 10),
-      child: Consumer<CartBloc>(builder: (context, cartBloc, _) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
+      child: Consumer<CartBloc>(builder: (context, value, _) {
+        return Material(
+          elevation: 6,
+          shadowColor: Colors.blueGrey.shade50.withOpacity(0.5),
+          shape: SquircleBorder(radius: 20),
+          color: Colors.grey.shade100,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: MediaQuery.of(context).size.width / 1.8,
+                          child: Text(
+                            widget.serviceItem.name,
+                            style: TextStyle(
+                              color: Colors.blueGrey.shade700,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                     Text(
-                      widget.serviceItem.name,
+                      value.durationToString(widget.serviceItem.timeRequired),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
+                        color: Colors.grey,
                       ),
                     ),
                   ],
                 ),
-                Text(
-                  "${widget.serviceItem.timeRequired.toString()} minutes",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey,
-                  ),
-                ),
-                Divider()
-              ],
-            ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "\$${widget.serviceItem.cost}",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
-                ),
-                SizedBox(width: 5),
-                IconButton(
-                  splashRadius: 10,
-                  icon: Icon(Icons.close),
-                  onPressed: () {
-                    cartBloc.removeFromCart(widget.serviceItem);
-                  },
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "\$${widget.serviceItem.cost}",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                    SizedBox(width: 5),
+                    IconButton(
+                      splashRadius: 10,
+                      icon: Icon(
+                        Icons.close,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () {
+                        value.removeFromCart(widget.serviceItem);
+                        showSimpleNotification(
+                          Text("${widget.serviceItem.name} removed from cart."),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
+          ),
         );
       }),
     );

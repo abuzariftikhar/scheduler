@@ -1,17 +1,16 @@
-import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 import 'package:cupertino_rounded_corners/cupertino_rounded_corners.dart';
-import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:scheduler/blocs/for_admin/AddServiceFormBloc.dart';
 import 'package:scheduler/models/ServiceModel.dart';
 import 'package:scheduler/widgets/Common.dart';
+import 'package:scheduler/widgets/custom_filled_icons_icons.dart';
 
 class AddServiceForm extends StatefulWidget {
   @override
@@ -19,28 +18,8 @@ class AddServiceForm extends StatefulWidget {
 }
 
 class _AddServiceFormState extends State<AddServiceForm> {
-  Timer timer;
   int charLength = 0;
-  Color dialogPickerColor = Colors.white;
-  static const Color guidePrimary = Color(0xFF6200EE);
-  static const Color guidePrimaryVariant = Color(0xFF3700B3);
-  static const Color guideSecondary = Color(0xFF03DAC6);
-  static const Color guideSecondaryVariant = Color(0xFF018786);
-  static const Color guideError = Color(0xFFB00020);
-  static const Color guideErrorDark = Color(0xFFCF6679);
-  static const Color blueBlues = Color(0xFF174378);
-
-  // Make a custom ColorSwatch to name map from the above custom colors.
-  final Map<ColorSwatch<Object>, String> colorsNameMap =
-      <ColorSwatch<Object>, String>{
-    ColorTools.createPrimarySwatch(guidePrimary): 'Guide Purple',
-    ColorTools.createPrimarySwatch(guidePrimaryVariant): 'Guide Purple Variant',
-    ColorTools.createAccentSwatch(guideSecondary): 'Guide Teal',
-    ColorTools.createAccentSwatch(guideSecondaryVariant): 'Guide Teal Variant',
-    ColorTools.createPrimarySwatch(guideError): 'Guide Error',
-    ColorTools.createPrimarySwatch(guideErrorDark): 'Guide Error Dark',
-    ColorTools.createPrimarySwatch(blueBlues): 'Blue blues',
-  };
+  List<Asset> images = [];
 
   _onChanged(String value) {
     setState(() {
@@ -48,54 +27,32 @@ class _AddServiceFormState extends State<AddServiceForm> {
     });
   }
 
-  Future<bool> colorPickerDialog() async {
-    return ColorPicker(
-      color: dialogPickerColor,
-      onColorChanged: (Color color) =>
-          setState(() => dialogPickerColor = color),
-      width: 40,
-      height: 40,
-      borderRadius: 4,
-      spacing: 5,
-      runSpacing: 5,
-      wheelDiameter: 155,
-      heading: Text(
-        'Select color',
-        style: Theme.of(context).textTheme.subtitle1,
-      ),
-      subheading: Text(
-        'Select color shade',
-        style: Theme.of(context).textTheme.subtitle1,
-      ),
-      wheelSubheading: Text(
-        'Selected color and its shades',
-        style: Theme.of(context).textTheme.subtitle1,
-      ),
-      showMaterialName: true,
-      showColorName: true,
-      showColorCode: true,
-      materialNameTextStyle: Theme.of(context).textTheme.caption,
-      colorNameTextStyle: Theme.of(context).textTheme.caption,
-      colorCodeTextStyle: Theme.of(context).textTheme.caption,
-      pickersEnabled: const <ColorPickerType, bool>{
-        ColorPickerType.both: false,
-        ColorPickerType.primary: true,
-        ColorPickerType.accent: true,
-        ColorPickerType.bw: false,
-        ColorPickerType.custom: true,
-        ColorPickerType.wheel: true,
-      },
-      customColorSwatchesAndNames: colorsNameMap,
-    ).showPickerDialog(
-      context,
-      constraints:
-          const BoxConstraints(minHeight: 460, minWidth: 300, maxWidth: 320),
-    );
-  }
-
   final _detailsController = TextEditingController();
   final _titleController = TextEditingController();
   final _priceController = TextEditingController();
+  Future<void> loadAssets() async {
+    List<Asset> resultList = [];
+
+    try {
+      resultList = await MultiImagePicker.pickImages(
+        maxImages: 5,
+        selectedAssets: images,
+        cupertinoOptions: CupertinoOptions(takePhotoIcon: "chat"),
+        materialOptions: MaterialOptions(
+          actionBarTitle: "Select Images for service",
+          allViewTitle: "All Photos",
+          useDetailsView: true,
+          startInAllView: true,
+        ),
+      );
+    } on Exception catch (e) {
+      e.toString();
+    }
+    if (!mounted) return;
+    setState(() {
+      images = resultList;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -139,13 +96,12 @@ class _AddServiceFormState extends State<AddServiceForm> {
                                   await value.uploadFile();
                                   bool result = await value.postService(
                                     ServiceItem(
-                                      name: value.title,
-                                      color: dialogPickerColor.value,
-                                      type: value.serviceType,
+                                      name: value.name,
+                                      type: value.type,
                                       category: value.category,
-                                      cost: value.price,
+                                      cost: value.cost,
                                       timeRequired: value.timeRequired,
-                                      imageURL: value.imageURL,
+                                      imageURLs: value.imageURLs,
                                       detailText: value.detailsText,
                                     ),
                                   );
@@ -177,163 +133,183 @@ class _AddServiceFormState extends State<AddServiceForm> {
                     ),
                   ],
                 ),
-                SliverPadding(
-                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate(
-                      [
-                        AspectRatio(
-                          aspectRatio: 1.1,
-                          child: Stack(
-                            alignment: Alignment.center,
+                SliverList(
+                  delegate: SliverChildListDelegate(
+                    [
+                      Container(
+                        margin: EdgeInsets.all(20.0),
+                        height: 400,
+                        width: MediaQuery.of(context).size.width,
+                        child: Material(
+                          shadowColor: Colors.blueGrey.shade100,
+                          elevation: 1,
+                          clipBehavior: Clip.antiAlias,
+                          color: Colors.white,
+                          shape: SquircleBorder(radius: 60),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.max,
                             children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  boxShadow: [
-                                    BoxShadow(
-                                      blurRadius: 30,
-                                      color: Colors.black12,
-                                      offset: Offset(0, 10),
-                                    ),
-                                  ],
-                                ),
-                                width: MediaQuery.of(context).size.width - 180,
+                              Padding(
+                                padding: const EdgeInsets.all(2),
                                 child: Material(
                                   clipBehavior: Clip.antiAlias,
-                                  shape: SquircleBorder(
-                                    radius: 50.0,
-                                  ),
-                                  child: Stack(
-                                    children: [
-                                      Consumer<AddServiceFormBloc>(
-                                          builder: (context, value, _) {
-                                        return Container(
-                                          child: value.imageFile == null
-                                              ? Center(child: Text("No Image"))
-                                              : Image.file(
-                                                  File(value.imageFile.path),
-                                                  alignment:
-                                                      Alignment.topCenter,
-                                                  fit: BoxFit.cover,
-                                                  height: double.maxFinite,
-                                                  width: double.maxFinite,
-                                                ),
+                                  shape: SquircleBorder(radius: 60),
+                                  child: Container(
+                                    height: 260,
+                                    width: MediaQuery.of(context).size.width,
+                                    child: Consumer<AddServiceFormBloc>(
+                                        builder: (context, value, _) {
+                                      if (value.imageFiles.isNotEmpty) {
+                                        return Image.file(
+                                          value.imageFiles[0],
+                                          filterQuality: FilterQuality.high,
+                                          fit: BoxFit.cover,
                                         );
-                                      }),
-                                      Align(
-                                        alignment: Alignment.bottomCenter,
-                                        child: ClipRect(
-                                          clipBehavior: Clip.antiAlias,
-                                          child: BackdropFilter(
-                                            filter: ImageFilter.blur(
-                                                sigmaX: 12.0, sigmaY: 12.0),
-                                            child: Container(
-                                              height: 70,
-                                              width: double.maxFinite,
-                                              color: Colors.black26,
-                                              child: Stack(
-                                                children: [
-                                                  Padding(
-                                                    padding: const EdgeInsets
-                                                            .fromLTRB(
-                                                        10, 10, 70, 10),
-                                                    child: Align(
-                                                      alignment:
-                                                          Alignment.centerLeft,
-                                                      child: Consumer<
-                                                              AddServiceFormBloc>(
-                                                          builder: (context,
-                                                              snapshot, _) {
-                                                        return Text(
-                                                          snapshot.title,
-                                                          style: TextStyle(
-                                                            color: Colors.white,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 12,
-                                                          ),
-                                                        );
-                                                      }),
+                                      } else
+                                        return Center(
+                                          child: Text(
+                                              "No Banner Image selected yet"),
+                                        );
+                                    }),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 10, horizontal: 20),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Consumer<AddServiceFormBloc>(
+                                                    builder:
+                                                        (context, value, _) {
+                                                  return Text(
+                                                    value.type,
+                                                    style: TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.w900,
+                                                      color: Colors
+                                                          .blueGrey.shade300,
                                                     ),
-                                                  ),
-                                                  Align(
-                                                    alignment:
-                                                        Alignment.bottomRight,
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              8),
-                                                      child: Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                        children: [
-                                                          Container(
-                                                            padding: EdgeInsets
-                                                                .symmetric(
-                                                              vertical: 2,
-                                                              horizontal: 5,
-                                                            ),
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          30),
-                                                              color: Colors
-                                                                  .amber
-                                                                  .shade900,
-                                                            ),
-                                                            child: Text(
-                                                              "Premium",
-                                                              style: TextStyle(
-                                                                color: Colors
-                                                                    .white,
-                                                                fontSize: 11,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          SizedBox(
-                                                            height: 5,
-                                                          ),
-                                                          Consumer<
-                                                                  AddServiceFormBloc>(
-                                                              builder: (context,
-                                                                  snapshot, _) {
-                                                            return Text(
-                                                              "\$${snapshot.price}",
-                                                              style: TextStyle(
-                                                                color: Colors
-                                                                    .white,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w800,
-                                                                fontSize: 16,
-                                                              ),
-                                                            );
-                                                          }),
-                                                        ],
+                                                  );
+                                                }),
+                                                Container(
+                                                  width: MediaQuery.of(context)
+                                                          .size
+                                                          .width /
+                                                      1.8,
+                                                  padding: EdgeInsets.symmetric(
+                                                      vertical: 5),
+                                                  child: Consumer<
+                                                          AddServiceFormBloc>(
+                                                      builder:
+                                                          (context, value, _) {
+                                                    return Text(
+                                                      value.name,
+                                                      textAlign:
+                                                          TextAlign.start,
+                                                      maxLines: 2,
+                                                      style: TextStyle(
+                                                        fontSize: 22,
+                                                        fontWeight:
+                                                            FontWeight.w900,
+                                                        color: Colors.blueGrey,
                                                       ),
-                                                    ),
-                                                  )
-                                                ],
-                                              ),
+                                                    );
+                                                  }),
+                                                ),
+                                              ],
                                             ),
-                                          ),
+                                            Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Consumer<AddServiceFormBloc>(
+                                                    builder:
+                                                        (context, value, _) {
+                                                  return Text(
+                                                    "\$${value.cost}",
+                                                    textAlign: TextAlign.start,
+                                                    style: TextStyle(
+                                                      fontSize: 28,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Colors
+                                                          .blueGrey.shade700,
+                                                    ),
+                                                  );
+                                                }),
+                                                Container(
+                                                  margin:
+                                                      EdgeInsets.only(top: 5),
+                                                  padding: EdgeInsets.symmetric(
+                                                      horizontal: 20.0,
+                                                      vertical: 8.0),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.grey.shade200,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            30),
+                                                  ),
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(
+                                                        CustomFilledIcons
+                                                            .fi_sr_shopping_bag_add,
+                                                        size: 16,
+                                                        color: Colors.blueGrey,
+                                                      ),
+                                                      SizedBox(width: 8),
+                                                      Text(
+                                                        "Add",
+                                                        textAlign:
+                                                            TextAlign.start,
+                                                        style: TextStyle(
+                                                          fontSize: 16,
+                                                          fontWeight:
+                                                              FontWeight.w900,
+                                                          color:
+                                                              Colors.blueGrey,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
                                         ),
-                                      )
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        SizedBox(height: 20),
-                        Column(
+                      ),
+                      SizedBox(height: 20),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
@@ -370,12 +346,12 @@ class _AddServiceFormState extends State<AddServiceForm> {
                                       horizontal: 15),
                                   child: Center(
                                     child: Consumer<AddServiceFormBloc>(
-                                        builder: (context, snapshot, _) {
+                                        builder: (context, value, _) {
                                       return TextFormField(
                                         controller: _titleController,
                                         onChanged: (text) {
-                                          snapshot.title = text;
-                                          snapshot.update();
+                                          value.name = text;
+                                          value.update();
                                         },
                                         textAlign: TextAlign.center,
                                         decoration: InputDecoration(
@@ -390,8 +366,11 @@ class _AddServiceFormState extends State<AddServiceForm> {
                             ),
                           ],
                         ),
-                        Divider(height: 20),
-                        Column(
+                      ),
+                      Divider(height: 20),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
@@ -455,175 +434,137 @@ class _AddServiceFormState extends State<AddServiceForm> {
                             ),
                           ],
                         ),
-                        Divider(height: 20),
-                        Column(
-                          children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.all(4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.blueGrey,
-                                    borderRadius: BorderRadius.circular(10),
+                      ),
+                      Divider(height: 20),
+                      Consumer<AddServiceFormBloc>(
+                        builder: (context, value, _) {
+                          return Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 20.0),
+                            child: CupertinoButton.filled(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.add_a_photo,
                                   ),
-                                  child: Icon(
-                                    Icons.photo_album,
-                                    color: Colors.white,
-                                    size: 16,
-                                  ),
-                                ),
-                                SizedBox(width: 8.0),
-                                Text("Set a Image"),
-                              ],
+                                  SizedBox(width: 10),
+                                  Text(value.imageFiles.isEmpty
+                                      ? "Add Images"
+                                      : "Change Images")
+                                ],
+                              ),
+                              onPressed: () async {
+                                await loadAssets();
+                                await value.getImageFilesFromAssets(images);
+                              },
                             ),
-                            SizedBox(height: 10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  children: [
-                                    Consumer<AddServiceFormBloc>(
-                                        builder: (context, snapshot, _) {
-                                      return GestureDetector(
-                                        onTap: () async {
-                                          snapshot
-                                              .pickImage(ImageSource.gallery);
-                                        },
-                                        child: Container(
-                                          width: 180,
-                                          height: 50,
-                                          child: Material(
-                                            clipBehavior: Clip.antiAlias,
-                                            color: Colors.green,
-                                            shape: SquircleBorder(
-                                              radius: 22.0,
-                                            ),
-                                            child: Center(
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Icon(
-                                                    Icons.upload_file,
-                                                    color: Colors.white,
-                                                  ),
-                                                  Text(
-                                                    snapshot.imageURL != null
-                                                        ? "Change Image"
-                                                        : "Upload Image",
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
+                          );
+                        },
+                      ),
+                      Consumer<AddServiceFormBloc>(
+                        builder: (context, value, child) {
+                          if (value.imageFiles.isEmpty)
+                            return Container();
+                          else
+                            return Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Text(
+                                "First image will be displayed in the service thumbnail previews and banners. You can reorder your selection by long pressing an image and dropping it where ever you like.",
+                              ),
+                            );
+                        },
+                      ),
+                      Container(
+                        height: 130,
+                        child: Consumer<AddServiceFormBloc>(
+                            builder: (context, value, _) {
+                          if (value.imageFiles.isNotEmpty) {
+                            return ReorderableListView(
+                              onReorder: (oldIndex, newIndex) {
+                                setState(
+                                  () {
+                                    if (newIndex > oldIndex) {
+                                      newIndex -= 1;
+                                    }
+                                    final File item =
+                                        value.imageFiles.removeAt(oldIndex);
+                                    value.imageFiles.insert(newIndex, item);
+                                  },
+                                );
+                              },
+                              scrollDirection: Axis.horizontal,
+                              children: value.imageFiles
+                                  .mapIndex<Container>((file, index) {
+                                return Container(
+                                  height: 130,
+                                  width: 170,
+                                  key: ValueKey(index),
+                                  margin: EdgeInsets.only(left: 5),
+                                  child: Stack(
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.all(8),
+                                        height: 130,
+                                        width: 170,
+                                        child: Material(
+                                          clipBehavior: Clip.hardEdge,
+                                          shape: SquircleBorder(radius: 30),
+                                          child: Image.file(
+                                            file,
+                                            fit: BoxFit.cover,
                                           ),
                                         ),
-                                      );
-                                    }),
-                                    SizedBox(height: 10),
-                                    Consumer<AddServiceFormBloc>(
-                                        builder: (context, snapshot, _) {
-                                      return GestureDetector(
-                                        onTap: () async {
-                                          snapshot.imageURL = null;
-                                          snapshot.update();
-                                        },
-                                        child: Container(
-                                          width: 180,
-                                          height: 50,
-                                          child: Material(
-                                            clipBehavior: Clip.antiAlias,
-                                            color: Colors.red,
-                                            shape: SquircleBorder(
-                                              radius: 22.0,
-                                            ),
-                                            child: Center(
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Icon(
-                                                    Icons
-                                                        .delete_forever_outlined,
-                                                    color: Colors.white,
-                                                  ),
-                                                  Text(
-                                                    "Remove Image",
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
+                                      ),
+                                      Align(
+                                        alignment: Alignment.topRight,
+                                        child: CircleAvatar(
+                                          backgroundColor:
+                                              Colors.blueGrey.shade100,
+                                          child: IconButton(
+                                            splashRadius: 1,
+                                            onPressed: () {
+                                              value.imageFiles.removeAt(index);
+                                              value.update();
+                                            },
+                                            icon: Icon(Icons.close),
+                                            color: Colors.white,
                                           ),
                                         ),
-                                      );
-                                    }),
-                                  ],
-                                ),
-                                Container(
-                                  height: 110.0,
-                                  child: Material(
-                                    color: Colors.white,
-                                    shape: SquircleBorder(
-                                      radius: 30.0,
-                                    ),
-                                    child: Container(
-                                      margin: EdgeInsets.symmetric(
-                                          horizontal: 3, vertical: 3),
-                                      height: 104,
-                                      width: 84,
-                                      child: Consumer<AddServiceFormBloc>(
-                                          builder: (context, snapshot, _) {
-                                        return Material(
-                                          clipBehavior: Clip.antiAlias,
-                                          color: Colors.white,
-                                          shape: SquircleBorder(
-                                            radius: 30.0,
-                                          ),
-                                          child: snapshot.imageFile == null
-                                              ? Center(child: Text("No Image"))
-                                              : Image.file(
-                                                  File(snapshot.imageFile.path),
-                                                  alignment:
-                                                      Alignment.topCenter,
-                                                  fit: BoxFit.cover,
-                                                  height: double.maxFinite,
-                                                  width: double.maxFinite,
-                                                ),
-                                        );
-                                      }),
-                                    ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        Divider(
-                          height: 20,
-                        ),
-                        Row(
+                                );
+                              }).toList(),
+                            );
+                          } else {
+                            return Center(child: Text("No Image selected yet"));
+                          }
+                        }),
+                      ),
+                      Divider(
+                        height: 20,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Container(
-                                  height: 40,
-                                  width: 40,
+                                  height: 45,
+                                  width: 45,
                                   child: Material(
-                                    color: Colors.blueAccent,
+                                    color: Colors.white70,
                                     shape: SquircleBorder(
                                       radius: 30.0,
                                     ),
                                     child: Icon(
                                       CupertinoIcons.hand_raised,
-                                      color: Colors.white,
+                                      color: Colors.blueGrey,
                                       size: 22,
                                     ),
                                   ),
@@ -635,9 +576,9 @@ class _AddServiceFormState extends State<AddServiceForm> {
                             Consumer<AddServiceFormBloc>(
                                 builder: (context, snapshot, _) {
                               return CustomDropdownList(
-                                initialvalue: snapshot.serviceType,
+                                initialvalue: snapshot.type,
                                 valueChanged: (val, index) {
-                                  snapshot.serviceType = val;
+                                  snapshot.type = val;
                                   snapshot.update();
                                 },
                                 itemList: [
@@ -651,26 +592,29 @@ class _AddServiceFormState extends State<AddServiceForm> {
                             }),
                           ],
                         ),
-                        Divider(
-                          height: 20,
-                        ),
-                        Row(
+                      ),
+                      Divider(
+                        height: 20,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Container(
-                                  height: 40,
-                                  width: 40,
+                                  height: 45,
+                                  width: 45,
                                   child: Material(
-                                    color: Colors.green.shade600,
+                                    color: Colors.white70,
                                     shape: SquircleBorder(
                                       radius: 30.0,
                                     ),
                                     child: Icon(
                                       Icons.design_services,
-                                      color: Colors.white,
+                                      color: Colors.blueGrey,
                                       size: 22,
                                     ),
                                   ),
@@ -699,95 +643,27 @@ class _AddServiceFormState extends State<AddServiceForm> {
                             }),
                           ],
                         ),
-                        Divider(
-                          height: 20,
-                        ),
-                        Row(
+                      ),
+                      Divider(height: 20),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Container(
-                                  height: 40,
-                                  width: 40,
+                                  height: 45,
+                                  width: 45,
                                   child: Material(
-                                    color: Colors.blue.shade900,
+                                    color: Colors.white70,
                                     shape: SquircleBorder(
                                       radius: 30.0,
                                     ),
                                     child: Icon(
                                       CupertinoIcons.money_dollar_circle,
-                                      color: Colors.white,
-                                      size: 22,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 8,
-                                ),
-                                Text("Set a Color"),
-                              ],
-                            ),
-                            Container(
-                              height: 60.0,
-                              width: MediaQuery.of(context).size.width / 2.2,
-                              child: InkWell(
-                                onTap: () {
-                                  colorPickerDialog();
-                                },
-                                child: Material(
-                                  clipBehavior: Clip.antiAlias,
-                                  color: Colors.white,
-                                  shape: SquircleBorder(
-                                    radius: 30.0,
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 15),
-                                    child: Center(
-                                        child: Row(
-                                      children: [
-                                        Container(
-                                          height: 45,
-                                          width: 45,
-                                          child: Material(
-                                            color: dialogPickerColor,
-                                            shape: SquircleBorder(
-                                              radius: 30.0,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(width: 10),
-                                        Text("Choose a Color"),
-                                      ],
-                                    )),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Divider(
-                          height: 20,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  height: 40,
-                                  width: 40,
-                                  child: Material(
-                                    color: Colors.blue.shade900,
-                                    shape: SquircleBorder(
-                                      radius: 30.0,
-                                    ),
-                                    child: Icon(
-                                      CupertinoIcons.money_dollar_circle,
-                                      color: Colors.white,
+                                      color: Colors.blueGrey,
                                       size: 22,
                                     ),
                                   ),
@@ -824,7 +700,7 @@ class _AddServiceFormState extends State<AddServiceForm> {
                                           signed: false,
                                         ),
                                         onChanged: (text) {
-                                          snapshot.price = text;
+                                          snapshot.cost = text;
                                         },
                                         textAlign: TextAlign.center,
                                         decoration: InputDecoration(
@@ -839,26 +715,29 @@ class _AddServiceFormState extends State<AddServiceForm> {
                             ),
                           ],
                         ),
-                        Divider(
-                          height: 20,
-                        ),
-                        Row(
+                      ),
+                      Divider(
+                        height: 20,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Container(
-                                  height: 40,
-                                  width: 40,
+                                  height: 45,
+                                  width: 45,
                                   child: Material(
-                                    color: Colors.red.shade600,
+                                    color: Colors.white70,
                                     shape: SquircleBorder(
                                       radius: 30.0,
                                     ),
                                     child: Icon(
                                       CupertinoIcons.stopwatch,
-                                      color: Colors.white,
+                                      color: Colors.blueGrey,
                                       size: 22,
                                     ),
                                   ),
@@ -873,7 +752,7 @@ class _AddServiceFormState extends State<AddServiceForm> {
                               height: 60.0,
                               width: MediaQuery.of(context).size.width / 2.2,
                               child: Consumer<AddServiceFormBloc>(
-                                  builder: (context, snapshot, _) {
+                                  builder: (context, value, _) {
                                 return Material(
                                     clipBehavior: Clip.antiAlias,
                                     color: Colors.white,
@@ -889,23 +768,11 @@ class _AddServiceFormState extends State<AddServiceForm> {
                                         children: [
                                           GestureDetector(
                                             onTap: () {
-                                              snapshot.timeRequired--;
-                                              snapshot.update();
-                                            },
-                                            onTapDown:
-                                                (TapDownDetails details) {
-                                              timer = Timer.periodic(
-                                                  Duration(milliseconds: 80),
-                                                  (t) {
-                                                snapshot.timeRequired--;
-                                                snapshot.update();
-                                              });
-                                            },
-                                            onTapUp: (TapUpDetails details) {
-                                              timer.cancel();
-                                            },
-                                            onTapCancel: () {
-                                              timer.cancel();
+                                              if (value.timeRequired > 15) {
+                                                value.timeRequired =
+                                                    value.timeRequired - 15;
+                                                value.update();
+                                              }
                                             },
                                             child: Container(
                                               height: 45,
@@ -929,7 +796,7 @@ class _AddServiceFormState extends State<AddServiceForm> {
                                             child: Container(
                                               child: Center(
                                                 child: Text(
-                                                  snapshot.timeRequired
+                                                  value.timeRequired
                                                           .toString() +
                                                       "\nMinutes",
                                                   textAlign: TextAlign.center,
@@ -942,23 +809,11 @@ class _AddServiceFormState extends State<AddServiceForm> {
                                           ),
                                           GestureDetector(
                                             onTap: () {
-                                              snapshot.timeRequired++;
-                                              snapshot.update();
-                                            },
-                                            onTapDown:
-                                                (TapDownDetails details) {
-                                              timer = Timer.periodic(
-                                                  Duration(milliseconds: 80),
-                                                  (t) {
-                                                snapshot.timeRequired++;
-                                                snapshot.update();
-                                              });
-                                            },
-                                            onTapUp: (TapUpDetails details) {
-                                              timer.cancel();
-                                            },
-                                            onTapCancel: () {
-                                              timer.cancel();
+                                              if (value.timeRequired < 360) {
+                                                value.timeRequired =
+                                                    value.timeRequired + 15;
+                                                value.update();
+                                              }
                                             },
                                             child: Container(
                                               height: 45,
@@ -982,16 +837,16 @@ class _AddServiceFormState extends State<AddServiceForm> {
                             ),
                           ],
                         ),
-                        Divider(height: 20),
-                        SizedBox(height: 20),
-                      ],
-                    ),
+                      ),
+                      Divider(height: 20),
+                      SizedBox(height: 20),
+                    ],
                   ),
                 ),
               ],
             ),
             Consumer<AddServiceFormBloc>(builder: (context, value, _) {
-              if (value.isPosting) {
+              if (value.isBusy) {
                 return AnimatedContainer(
                   duration: Duration(milliseconds: 300),
                   height: MediaQuery.of(context).size.height,

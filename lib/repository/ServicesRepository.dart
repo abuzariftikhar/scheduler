@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:scheduler/models/ServiceModel.dart';
+import 'package:uuid/uuid.dart';
 
 abstract class ServiceReopsitory {
   final String servicesPath = "services";
@@ -14,10 +15,11 @@ abstract class ServiceReopsitory {
 class ServiceRepositoryImpl extends ServiceReopsitory {
   @override
   Future<bool> createService(ServiceItem serviceModel) async {
+    var uuid = Uuid();
     try {
       CollectionReference reference =
           FirebaseFirestore.instance.collection(servicesPath);
-      serviceModel.id = reference.id;
+      serviceModel.id = uuid.v4().toString();
       await reference.add(serviceModel.toMap());
       return true;
     } catch (e) {
