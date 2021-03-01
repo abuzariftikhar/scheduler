@@ -36,7 +36,7 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.theapplogics.scheduler"
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 30
         multiDexEnabled true
         versionCode flutterVersionCode.toInteger()
@@ -47,7 +47,10 @@ android {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+          signingConfig signingConfigs.debug
+            minifyEnabled true // Add these lines
+            shrinkResources true // Add these lines
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt') // Add these lines
         }
     }
 }

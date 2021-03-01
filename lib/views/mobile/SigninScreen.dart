@@ -94,7 +94,7 @@ class SignIn extends StatelessWidget {
                 width: MediaQuery.of(context).size.width,
                 child: Material(
                   color: Colors.blueGrey.shade50,
-                  shape: SquircleBorder(radius: 30),
+                  shape: SquircleBorder(radius: BorderRadius.circular(30),),
                   child: Padding(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -125,7 +125,7 @@ class SignIn extends StatelessWidget {
                 width: MediaQuery.of(context).size.width,
                 child: Material(
                   color: Colors.blueGrey.shade50,
-                  shape: SquircleBorder(radius: 30),
+                  shape: SquircleBorder(radius: BorderRadius.circular(30),),
                   child: Padding(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 8),

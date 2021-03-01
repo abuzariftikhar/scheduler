@@ -103,7 +103,7 @@ class _ServicesManagementScreenState extends State<ServicesManagementScreen> {
           elevation: 3,
           color: Colors.blueAccent,
           clipBehavior: Clip.antiAlias,
-          shape: SquircleBorder(radius: 40),
+          shape: SquircleBorder(radius: BorderRadius.circular(40),),
           child: InkWell(
             splashColor: Colors.white24,
             onTap: () {
@@ -160,7 +160,7 @@ class _ServicesManagementScreenState extends State<ServicesManagementScreen> {
                 height: MediaQuery.of(context).size.height - 200,
                 width: MediaQuery.of(context).size.width,
                 child: Material(
-                  shape: SquircleBorder(radius: 50),
+                  shape: SquircleBorder(radius: BorderRadius.circular(50),),
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Column(

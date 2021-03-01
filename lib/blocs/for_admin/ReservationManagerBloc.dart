@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scheduler/models/Reservation.dart';
-import 'package:scheduler/repository/ReservationRepsitory.dart';
+import 'package:scheduler/repository/ReservationsRepsitory.dart';
 
 class ReservationManagerBloc extends ChangeNotifier {
   ReservationReopsitory _reservationReopsitory = ReservationRepositoryImpl();
@@ -27,17 +27,6 @@ class ReservationManagerBloc extends ChangeNotifier {
   Future loadUserReservations(String userId) async {
     isLoading = true;
     userReservation = await _reservationReopsitory.getUserReservations(userId);
-    isLoading = false;
-    notifyListeners();
-  }
-
-  Future loadReservedHours(String date) async {
-    reservedHours.clear();
-    isLoading = true;
-    var _list = await _reservationReopsitory.getReservedHours(date);
-    _list.map((e) => e.slotsReserved.forEach((element) {
-          reservedHours.add(element);
-        }));
     isLoading = false;
     notifyListeners();
   }

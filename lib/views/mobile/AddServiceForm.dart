@@ -88,7 +88,7 @@ class _AddServiceFormState extends State<AddServiceForm> {
                               elevation: 1,
                               color: Colors.blueAccent,
                               shape: SquircleBorder(
-                                radius: 20.0,
+                                radius: BorderRadius.circular(20),
                               ),
                               child: InkResponse(
                                 splashColor: Colors.white24,
@@ -145,7 +145,8 @@ class _AddServiceFormState extends State<AddServiceForm> {
                           elevation: 1,
                           clipBehavior: Clip.antiAlias,
                           color: Colors.white,
-                          shape: SquircleBorder(radius: 60),
+                          shape:
+                              SquircleBorder(radius: BorderRadius.circular(60)),
                           child: Column(
                             mainAxisSize: MainAxisSize.max,
                             children: [
@@ -153,7 +154,8 @@ class _AddServiceFormState extends State<AddServiceForm> {
                                 padding: const EdgeInsets.all(2),
                                 child: Material(
                                   clipBehavior: Clip.antiAlias,
-                                  shape: SquircleBorder(radius: 60),
+                                  shape: SquircleBorder(
+                                      radius: BorderRadius.circular(60)),
                                   child: Container(
                                     height: 260,
                                     width: MediaQuery.of(context).size.width,
@@ -339,7 +341,7 @@ class _AddServiceFormState extends State<AddServiceForm> {
                                 clipBehavior: Clip.antiAlias,
                                 color: Colors.white,
                                 shape: SquircleBorder(
-                                  radius: 30.0,
+                                  radius: BorderRadius.circular(30),
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
@@ -399,7 +401,7 @@ class _AddServiceFormState extends State<AddServiceForm> {
                                 clipBehavior: Clip.antiAlias,
                                 color: Colors.white,
                                 shape: SquircleBorder(
-                                  radius: 30.0,
+                                  radius: BorderRadius.circular(30),
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
@@ -415,7 +417,8 @@ class _AddServiceFormState extends State<AddServiceForm> {
                                         },
                                         maxLines: null,
                                         maxLength: 255,
-                                        maxLengthEnforced: true,
+                                        maxLengthEnforcement:
+                                            MaxLengthEnforcement.enforced,
                                         decoration: InputDecoration(
                                             counter: charLength == 0
                                                 ? Container()
@@ -510,7 +513,9 @@ class _AddServiceFormState extends State<AddServiceForm> {
                                         width: 170,
                                         child: Material(
                                           clipBehavior: Clip.hardEdge,
-                                          shape: SquircleBorder(radius: 30),
+                                          shape: SquircleBorder(
+                                              radius:
+                                                  BorderRadius.circular(30)),
                                           child: Image.file(
                                             file,
                                             fit: BoxFit.cover,
@@ -560,7 +565,7 @@ class _AddServiceFormState extends State<AddServiceForm> {
                                   child: Material(
                                     color: Colors.white70,
                                     shape: SquircleBorder(
-                                      radius: 30.0,
+                                      radius: BorderRadius.circular(30),
                                     ),
                                     child: Icon(
                                       CupertinoIcons.hand_raised,
@@ -610,7 +615,7 @@ class _AddServiceFormState extends State<AddServiceForm> {
                                   child: Material(
                                     color: Colors.white70,
                                     shape: SquircleBorder(
-                                      radius: 30.0,
+                                      radius: BorderRadius.circular(30),
                                     ),
                                     child: Icon(
                                       Icons.design_services,
@@ -659,7 +664,7 @@ class _AddServiceFormState extends State<AddServiceForm> {
                                   child: Material(
                                     color: Colors.white70,
                                     shape: SquircleBorder(
-                                      radius: 30.0,
+                                      radius: BorderRadius.circular(30),
                                     ),
                                     child: Icon(
                                       CupertinoIcons.money_dollar_circle,
@@ -681,7 +686,7 @@ class _AddServiceFormState extends State<AddServiceForm> {
                                 clipBehavior: Clip.antiAlias,
                                 color: Colors.white,
                                 shape: SquircleBorder(
-                                  radius: 30.0,
+                                  radius: BorderRadius.circular(30),
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
@@ -733,7 +738,7 @@ class _AddServiceFormState extends State<AddServiceForm> {
                                   child: Material(
                                     color: Colors.white70,
                                     shape: SquircleBorder(
-                                      radius: 30.0,
+                                      radius: BorderRadius.circular(30),
                                     ),
                                     child: Icon(
                                       CupertinoIcons.stopwatch,
@@ -757,7 +762,7 @@ class _AddServiceFormState extends State<AddServiceForm> {
                                     clipBehavior: Clip.antiAlias,
                                     color: Colors.white,
                                     shape: SquircleBorder(
-                                      radius: 30.0,
+                                      radius: BorderRadius.circular(30),
                                     ),
                                     child: Padding(
                                       padding: const EdgeInsets.symmetric(
@@ -780,7 +785,8 @@ class _AddServiceFormState extends State<AddServiceForm> {
                                               child: Material(
                                                 color: Colors.grey.shade800,
                                                 shape: SquircleBorder(
-                                                  radius: 30.0,
+                                                  radius:
+                                                      BorderRadius.circular(30),
                                                 ),
                                                 child: Transform.translate(
                                                   offset: Offset(0, -8),
@@ -821,7 +827,8 @@ class _AddServiceFormState extends State<AddServiceForm> {
                                               child: Material(
                                                 color: Colors.grey.shade800,
                                                 shape: SquircleBorder(
-                                                  radius: 30.0,
+                                                  radius:
+                                                      BorderRadius.circular(30),
                                                 ),
                                                 child: Icon(
                                                   CupertinoIcons.plus,

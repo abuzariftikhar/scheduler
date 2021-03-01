@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:cupertino_rounded_corners/cupertino_rounded_corners.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:scheduler/blocs/BookingScreenBloc.dart';
 import 'package:scheduler/widgets/custom_filled_icons_icons.dart';
 import 'package:scheduler/widgets/custom_icons_icons.dart';
 
@@ -63,7 +65,9 @@ class _LandingScreenState extends State<LandingScreen>
                         Material(
                           elevation: 5,
                           clipBehavior: Clip.antiAlias,
-                          shape: SquircleBorder(radius: 50),
+                          shape: SquircleBorder(
+                            radius: BorderRadius.circular(50),
+                          ),
                           child: Container(
                             decoration: BoxDecoration(
                               gradient: LinearGradient(colors: [
@@ -215,13 +219,15 @@ class _Button1State extends State<Button1> {
           });
         },
         child: Material(
+          elevation: 5,
           clipBehavior: Clip.hardEdge,
-          shape: SquircleBorder(radius: 20),
+          shape: SquircleBorder(
+            radius: BorderRadius.circular(20),
+          ),
           child: AnimatedContainer(
             padding: EdgeInsets.all(10),
             height: 60,
             duration: Duration(milliseconds: 300),
-          
             decoration: BoxDecoration(
               color: pressed
                   ? widget.backgroundColor.withOpacity(0.5)
@@ -297,8 +303,11 @@ class _Button2State extends State<Button2> {
           });
         },
         child: Material(
+          elevation: 5,
           clipBehavior: Clip.hardEdge,
-          shape: SquircleBorder(radius: 20),
+          shape: SquircleBorder(
+            radius: BorderRadius.circular(20),
+          ),
           child: AnimatedContainer(
             padding: EdgeInsets.all(10),
             height: 60,
@@ -331,6 +340,97 @@ class _Button2State extends State<Button2> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class PaymentButton extends StatefulWidget {
+  final int index;
+  final String title;
+  final Color titleColor;
+  final Color backgroundColor;
+  final VoidCallback onTap;
+  final IconData iconData;
+  final Color iconColor;
+  const PaymentButton({
+    Key key,
+    @required this.index,
+    @required this.title,
+    @required this.titleColor,
+    @required this.iconData,
+    @required this.backgroundColor,
+    this.iconColor = Colors.white,
+    this.onTap,
+  }) : super(key: key);
+  @override
+  _PaymentButtonState createState() => _PaymentButtonState();
+}
+
+class _PaymentButtonState extends State<PaymentButton> {
+  bool pressed = false;
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Consumer<BookingScreenBloc>(builder: (context, value, _) {
+        return GestureDetector(
+          onTap: widget.onTap,
+          onTapDown: (details) {
+            setState(() {
+              pressed = true;
+            });
+          },
+          onTapUp: (details) {
+            setState(() {
+              pressed = false;
+            });
+          },
+          onTapCancel: () {
+            setState(() {
+              pressed = false;
+            });
+          },
+          child: Material(
+            clipBehavior: Clip.hardEdge,
+            shape: SquircleBorder(
+              radius: BorderRadius.circular(20),
+            ),
+            child: AnimatedContainer(
+              padding: EdgeInsets.all(10),
+              height: 60,
+              duration: Duration(milliseconds: 300),
+              decoration: BoxDecoration(
+                color: value.paymentIndex == widget.index
+                    ? widget.backgroundColor
+                    : Colors.blueGrey.shade50,
+              ),
+              curve: Curves.ease,
+              child: Center(
+                  child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    widget.iconData,
+                    color: value.paymentIndex == widget.index
+                        ? widget.iconColor
+                        : Colors.black87,
+                  ),
+                  SizedBox(width: 10),
+                  Text(
+                    widget.title,
+                    style: TextStyle(
+                      color: value.paymentIndex == widget.index
+                          ? widget.titleColor
+                          : Colors.black87,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              )),
+            ),
+          ),
+        );
+      }),
     );
   }
 }

@@ -9,24 +9,11 @@ abstract class ServiceReopsitory {
   Future<List<ServiceItem>> getServicesbyType(String type);
   Future<List<ServiceItem>> getServicesbyCategory(String category);
   Future<bool> createService(ServiceItem serviceModel);
-  // Future<ServiceModel> updateService(ServiceModel serviceModel);
+  Future<bool> updateService(ServiceItem serviceModel);
+  Future<bool> deleteService(ServiceItem serviceModel);
 }
 
 class ServiceRepositoryImpl extends ServiceReopsitory {
-  @override
-  Future<bool> createService(ServiceItem serviceModel) async {
-    var uuid = Uuid();
-    try {
-      CollectionReference reference =
-          FirebaseFirestore.instance.collection(servicesPath);
-      serviceModel.id = uuid.v4().toString();
-      await reference.add(serviceModel.toMap());
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
   @override
   Future<List<ServiceItem>> getServicesbyType(String type) async {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
@@ -59,5 +46,44 @@ class ServiceRepositoryImpl extends ServiceReopsitory {
         .map((DocumentSnapshot doc) => ServiceItem.fromMap(doc.data()))
         .toList();
     return list;
+  }
+
+  @override
+  Future<bool> createService(ServiceItem serviceModel) async {
+    var uuid = Uuid();
+    try {
+      CollectionReference reference =
+          FirebaseFirestore.instance.collection(servicesPath);
+      var id = uuid.v4().toString();
+      serviceModel.id = id;
+      await reference.doc(id).set(serviceModel.toMap());
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> updateService(ServiceItem serviceModel) async {
+    try {
+      CollectionReference reference =
+          FirebaseFirestore.instance.collection(servicesPath);
+      await reference.doc(serviceModel.id).update(serviceModel.toMap());
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> deleteService(ServiceItem serviceModel) async {
+    try {
+      CollectionReference reference =
+          FirebaseFirestore.instance.collection(servicesPath);
+      await reference.doc(serviceModel.id).delete();
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }

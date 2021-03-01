@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:cupertino_rounded_corners/cupertino_rounded_corners.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:scheduler/blocs/CartBloc.dart';
 import 'package:scheduler/models/ServiceModel.dart';
@@ -107,14 +106,7 @@ class _ServiceDetailsScreenState extends State<ServiceDetailsScreen> {
                 child: Consumer<CartBloc>(builder: (context, value, _) {
                   return GestureDetector(
                     onTap: () {
-                      String msg;
-                      if (value.cartItems.contains(widget.serviceModel)) {
-                        msg = "Item already present in cart";
-                      } else {
-                        value.addtocart(widget.serviceModel);
-                        msg = "Item added to cart";
-                      }
-                      Fluttertoast.showToast(msg: msg);
+                      value.addtocart(widget.serviceModel);
                     },
                     child: Row(
                       children: [
@@ -125,7 +117,7 @@ class _ServiceDetailsScreenState extends State<ServiceDetailsScreen> {
                           child: Material(
                             elevation: 5,
                             color: Colors.blueAccent,
-                            shape: SquircleBorder(radius: 40),
+                            shape: SquircleBorder(radius: BorderRadius.circular(40),),
                             child: Center(
                               child: Text(
                                 "Add to Booking List",

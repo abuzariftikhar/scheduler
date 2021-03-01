@@ -3,21 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>1097956559722-08pseqdir34b28upoibq4ra89v0tuhk9.apps.googleusercontent.com</string>
+	<string>533369188578-33v4ime80boo9m8c33vevtm9fe2i4v3j.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.1097956559722-08pseqdir34b28upoibq4ra89v0tuhk9</string>
+	<string>com.googleusercontent.apps.533369188578-33v4ime80boo9m8c33vevtm9fe2i4v3j</string>
 	<key>API_KEY</key>
-	<string>AIzaSyAlUPpWwTqDE6a19jn9pySfVfmZK8pYTLs</string>
+	<string>AIzaSyAbWDPpPBR_06FkU5XwmIGkrbJX8vKCxQg</string>
 	<key>GCM_SENDER_ID</key>
-	<string>1097956559722</string>
+	<string>533369188578</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.theapplogics.scheduler</string>
 	<key>PROJECT_ID</key>
-	<string>qr-to-store</string>
+	<string>scheduler-b4b0f</string>
 	<key>STORAGE_BUCKET</key>
-	<string>qr-to-store.appspot.com</string>
+	<string>scheduler-b4b0f.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,8 +29,8 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:1097956559722:ios:51678e5f2b0f0566113313</string>
+	<string>1:533369188578:ios:b0472509459df70c952ebb</string>
 	<key>DATABASE_URL</key>
-	<string>https://qr-to-store.firebaseio.com</string>
+	<string>https://scheduler-b4b0f-default-rtdb.firebaseio.com</string>
 </dict>
 </plist>

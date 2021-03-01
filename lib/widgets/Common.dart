@@ -41,7 +41,7 @@ class _CustomDropdownListState extends State<CustomDropdownList> {
                   elevation: 3,
                   clipBehavior: Clip.antiAlias,
                   shape: SquircleBorder(
-                    radius: 30,
+                    radius: BorderRadius.circular(30),
                   ),
                   child: Container(
                     height: 170,
@@ -104,7 +104,7 @@ class _CustomDropdownListState extends State<CustomDropdownList> {
         color: Colors.white,
         clipBehavior: Clip.antiAlias,
         shape: SquircleBorder(
-          radius: 30.0,
+          radius: BorderRadius.circular(30),
         ),
         child: InkResponse(
           splashColor: Colors.blueAccent.withOpacity(0.1),

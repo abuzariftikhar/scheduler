@@ -1,10 +1,7 @@
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:overlay_support/overlay_support.dart';
 import 'package:provider/provider.dart';
 import 'package:scheduler/blocs/AuthenticationBloc.dart';
 import 'package:scheduler/blocs/CartBloc.dart';
@@ -17,16 +14,16 @@ Future<void> main() async {
   await Firebase.initializeApp();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((_) {
-    runApp(new MyApp());
+    runApp(App());
   });
 }
 
-class MyApp extends StatefulWidget {
+class App extends StatefulWidget {
   @override
-  _MyAppState createState() => _MyAppState();
+  _AppState createState() => _AppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -35,18 +32,16 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (context) => CustomerHomeBloc()),
         ChangeNotifierProvider(create: (context) => AuthenticationBloc()),
       ],
-      child: OverlaySupport(
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Scheduler',
-          theme: ThemeData(
-              splashFactory: InkRipple.splashFactory,
-              splashColor: Colors.white24,
-              highlightColor: Colors.transparent,
-              scaffoldBackgroundColor: Color(0xffecebf1),
-              primarySwatch: createMaterialColor(Colors.blueAccent)),
-          home: AuthWrapper(),
-        ),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Scheduler',
+        theme: ThemeData(
+            splashFactory: InkRipple.splashFactory,
+            splashColor: Colors.white24,
+            highlightColor: Colors.transparent,
+            scaffoldBackgroundColor: Color(0xffecebf1),
+            primarySwatch: createMaterialColor(Colors.blueAccent)),
+        home: AuthWrapper(),
       ),
     );
   }

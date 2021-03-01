@@ -22,7 +22,6 @@ class SignUp extends StatelessWidget {
         backgroundColor: Colors.white,
         body: Stack(
           children: [
-            
             Align(
                 alignment: Alignment.bottomCenter,
                 child: Padding(
@@ -85,7 +84,9 @@ class SignUp extends StatelessWidget {
                   width: MediaQuery.of(context).size.width,
                   child: Material(
                     color: Colors.blueGrey.shade50,
-                    shape: SquircleBorder(radius: 20),
+                    shape: SquircleBorder(
+                      radius: BorderRadius.circular(20),
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 8),
@@ -111,7 +112,9 @@ class SignUp extends StatelessWidget {
                   width: MediaQuery.of(context).size.width,
                   child: Material(
                     color: Colors.blueGrey.shade50,
-                    shape: SquircleBorder(radius: 20),
+                    shape: SquircleBorder(
+                      radius: BorderRadius.circular(20),
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 8),
@@ -136,7 +139,9 @@ class SignUp extends StatelessWidget {
                   width: MediaQuery.of(context).size.width,
                   child: Material(
                     color: Colors.blueGrey.shade50,
-                    shape: SquircleBorder(radius: 20),
+                    shape: SquircleBorder(
+                      radius: BorderRadius.circular(20),
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 8),
@@ -194,17 +199,17 @@ class SignUp extends StatelessWidget {
               ],
             ),
             Consumer<AuthenticationBloc>(builder: (context, value, _) {
-            if (value.isBusy) {
-              return Container(
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-                color: Colors.white24,
-                child: Center(child: CircularProgressIndicator()),
-              );
-            } else {
-              return Container();
-            }
-          }),
+              if (value.isBusy) {
+                return Container(
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  color: Colors.white24,
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              } else {
+                return Container();
+              }
+            }),
           ],
         ));
   }

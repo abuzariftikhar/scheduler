@@ -49,7 +49,7 @@ class _HomeListTileState extends State<HomeListTile> {
         child: Material(
           color: Colors.white,
           shape: SquircleBorder(
-            radius: 30,
+         radius: BorderRadius.circular(30),
           ),
           child: Padding(
             padding: const EdgeInsets.all(2.0),
@@ -62,7 +62,7 @@ class _HomeListTileState extends State<HomeListTile> {
                   width: 125,
                   child: Material(
                     color: Colors.blueAccent.withOpacity(0.1),
-                    shape: SquircleBorder(radius: 30),
+                    shape: SquircleBorder(radius: BorderRadius.circular(30),),
                     child: Padding(
                         padding: const EdgeInsets.all(20.0),
                         child: Icon(
@@ -123,7 +123,7 @@ class _SingleImageBannerState extends State<SingleImageBanner> {
             elevation: 1,
             shadowColor: Colors.black54,
             color: Colors.white,
-            shape: SquircleBorder(radius: 50),
+            shape: SquircleBorder(radius: BorderRadius.circular(50),),
             child: InkResponse(
               splashColor: Colors.grey.shade100,
               onTap: () {
@@ -163,7 +163,7 @@ class _SingleImageBannerState extends State<SingleImageBanner> {
                         GestureDetector(
                           child: Container(
                             child: Material(
-                              shape: SquircleBorder(radius: 30),
+                              shape: SquircleBorder(radius: BorderRadius.circular(30),),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [

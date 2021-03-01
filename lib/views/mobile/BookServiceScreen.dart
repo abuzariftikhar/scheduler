@@ -1,14 +1,19 @@
 import 'dart:ui';
 
+import 'package:another_flushbar/flushbar.dart';
 import 'package:cupertino_rounded_corners/cupertino_rounded_corners.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:overlay_support/overlay_support.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
+import 'package:scheduler/blocs/BookingScreenBloc.dart';
 import 'package:scheduler/blocs/CartBloc.dart';
+import 'package:scheduler/services/payment_methods/PaypalPayment.dart';
 import 'package:scheduler/views/mobile/LandingScreen.dart';
 import 'package:scheduler/widgets/custom_filled_icons_icons.dart';
+import 'package:scheduler/widgets/custom_icons_icons.dart';
 
 import 'QuickEntryScreen.dart';
 
@@ -35,40 +40,74 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
     return _widget;
   }
 
+  Future<bool> _onBackPressed(BuildContext context) {
+    return showDialog(
+        barrierColor: Colors.blueGrey.withOpacity(0.95),
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Row(
+              children: [
+                Icon(
+                  CustomFilledIcons.fi_sr_exclamation,
+                  size: 18,
+                  color: Colors.orange,
+                ),
+                SizedBox(width: 5),
+                Text('Exit'),
+              ],
+            ),
+            content: Text("Do you wish to cancel booking?"),
+            actions: <Widget>[
+              TextButton(
+                  child: Text('NO'),
+                  onPressed: () => Navigator.pop(context, false)),
+              TextButton(
+                  child: Text('Yes'),
+                  onPressed: () => Navigator.pop(context, true))
+            ],
+          );
+        });
+  }
+
   void initState() {
     date = formatter.format(DateTime.now());
-    Provider.of<CartBloc>(context, listen: false).reset();
-    Provider.of<CartBloc>(context, listen: false).loadHours();
-    Provider.of<CartBloc>(context, listen: false).loadReservedHours(date);
-
+    Provider.of<BookingScreenBloc>(context, listen: false).reset();
+    Provider.of<BookingScreenBloc>(context, listen: false).makeTimeSlots();
+    // Provider.of<CartBloc>(context, listen: false).loadReservedHours(date);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.white,
-        body: Stack(
-          children: [
-            Consumer<CartBloc>(builder: (context, value, _) {
-              return AnimatedSwitcher(
-                  duration: Duration(milliseconds: 400),
-                  reverseDuration: Duration(milliseconds: 10),
-                  transitionBuilder: (child, animation) => SlideTransition(
-                        position: Tween<Offset>(
-                                begin: Offset(
-                                  value.index > value.previousIndex ? 1 : -1,
-                                  0,
-                                ),
-                                end: Offset(0, 0))
-                            .chain(CurveTween(curve: Curves.easeOutCirc))
-                            .animate(animation),
-                        child: child,
-                      ),
-                  child: _getBookingScreen(value.index));
-            }),
-          ],
-        ));
+    return WillPopScope(
+      onWillPop: () => _onBackPressed(context),
+      child: Scaffold(
+          backgroundColor: Colors.white,
+          body: Stack(
+            children: [
+              Consumer<BookingScreenBloc>(builder: (context, value, _) {
+                return AnimatedSwitcher(
+                    duration: Duration(milliseconds: 400),
+                    reverseDuration: Duration(milliseconds: 10),
+                    transitionBuilder: (child, animation) => SlideTransition(
+                          position: Tween<Offset>(
+                                  begin: Offset(
+                                    value.widgetIndex > value.previousIndex
+                                        ? 1
+                                        : -1,
+                                    0,
+                                  ),
+                                  end: Offset(0, 0))
+                              .chain(CurveTween(curve: Curves.easeOutCirc))
+                              .animate(animation),
+                          child: child,
+                        ),
+                    child: _getBookingScreen(value.widgetIndex));
+              }),
+            ],
+          )),
+    );
   }
 }
 
@@ -114,57 +153,58 @@ class SlotTile extends StatefulWidget {
 class _SlotTileState extends State<SlotTile> {
   @override
   Widget build(BuildContext context) {
-    return Consumer<CartBloc>(builder: (context, value, _) {
+    return Consumer<BookingScreenBloc>(builder: (context, value, _) {
       return GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: Duration(milliseconds: 300),
-          curve: Curves.decelerate,
           decoration: BoxDecoration(
-            color: value.currentSelection.contains(widget.index)
+            color: value.currentTimelineSelection.contains(widget.index)
                 ? Colors.blueAccent
-                : value.reservedSlots.contains(widget.index)
+                : value.occupiedTimeline.contains(widget.index)
                     ? Colors.blueGrey.shade100
                     : Colors.grey.shade100,
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Text(
-                widget.from,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: value.currentSelection.contains(widget.index)
-                      ? Colors.white
-                      : value.reservedSlots.contains(widget.index)
-                          ? Colors.blueGrey
-                          : Colors.black,
-                ),
+              Container(
+                height: 40,
+                width: 4,
+                color: Colors.black,
+              ),
+              SizedBox(width: 20),
+              Column(
+                children: [
+                  Text(
+                    widget.to,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color:
+                          value.currentTimelineSelection.contains(widget.index)
+                              ? Colors.white
+                              : value.occupiedTimeline.contains(widget.index)
+                                  ? Colors.blueGrey
+                                  : Colors.black,
+                    ),
+                  ),
+                  SizedBox(height: 5),
+                  Text(
+                    widget.to,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color:
+                          value.currentTimelineSelection.contains(widget.index)
+                              ? Colors.white
+                              : value.occupiedTimeline.contains(widget.index)
+                                  ? Colors.blueGrey
+                                  : Colors.black,
+                    ),
+                  ),
+                ],
               ),
               Text(
-                "To",
-                style: TextStyle(
-                  color: value.currentSelection.contains(widget.index)
-                      ? Colors.white
-                      : value.reservedSlots.contains(widget.index)
-                          ? Colors.blueGrey
-                          : Colors.black,
-                ),
-              ),
-              Text(
-                widget.to,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: value.currentSelection.contains(widget.index)
-                      ? Colors.white
-                      : value.reservedSlots.contains(widget.index)
-                          ? Colors.blueGrey
-                          : Colors.black,
-                ),
-              ),
-              SizedBox(height: 5),
-              Text(
-                value.reservedSlots.contains(widget.index)
+                value.occupiedTimeline.contains(widget.index)
                     ? "reserved"
                     : "available",
               ),
@@ -198,7 +238,7 @@ class _BookingOverviewScreenState extends State<BookingOverviewScreen> {
                 background: Container(
                   height: 200,
                   decoration: BoxDecoration(
-                    color: Colors.blueAccent.shade100,
+                    color: Colors.blueAccent,
                   ),
                   child: Stack(
                     children: [
@@ -207,7 +247,7 @@ class _BookingOverviewScreenState extends State<BookingOverviewScreen> {
                         child: Icon(
                           CustomFilledIcons.fi_sr_notebook,
                           size: 150,
-                          color: Colors.white54,
+                          color: Colors.white30,
                         ),
                       ),
                       Padding(
@@ -220,7 +260,7 @@ class _BookingOverviewScreenState extends State<BookingOverviewScreen> {
                             Text(
                               "Booking Overview",
                               style: TextStyle(
-                                color: Colors.black,
+                                color: Colors.white,
                                 fontSize: 36,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -228,7 +268,7 @@ class _BookingOverviewScreenState extends State<BookingOverviewScreen> {
                             Text(
                               "Let's get your reservation ready.",
                               style: TextStyle(
-                                color: Colors.black,
+                                color: Colors.white70,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -360,7 +400,7 @@ class _BookingOverviewScreenState extends State<BookingOverviewScreen> {
             ),
           ],
         ),
-        Consumer<CartBloc>(builder: (context, value, _) {
+        Consumer<BookingScreenBloc>(builder: (context, value, _) {
           return Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
@@ -369,25 +409,34 @@ class _BookingOverviewScreenState extends State<BookingOverviewScreen> {
                 children: [
                   Button2(
                     onTap: () {
-                      if (value.cartItems.isNotEmpty) {
-                        value.previousIndex = value.index;
-                        value.index++;
+                      if (Provider.of<CartBloc>(context).cartItems.isNotEmpty) {
+                        value.previousIndex = value.widgetIndex;
+                        value.widgetIndex++;
                         value.update();
                       } else {
-                        showSimpleNotification(
-                            Text(
-                              "No item present in cart. please add items to continue booking process",
-                            ),
-                            background: Colors.redAccent,
-                            duration: Duration(seconds: 3));
+                        Flushbar(
+                          title: "Cart Empty",
+                          message: "Add items to cart to continue.",
+                          duration: Duration(seconds: 3),
+                          animationDuration: Duration(milliseconds: 300),
+                          isDismissible: true,
+                          flushbarPosition: FlushbarPosition.TOP,
+                          icon: Icon(
+                            Icons.warning,
+                            color: Colors.white,
+                          ),
+                          backgroundColor: Colors.red,
+                          shouldIconPulse: true,
+                        )..show(context);
                       }
                     },
                     title: "Next",
                     titleColor: Colors.white,
                     iconData: Icons.arrow_forward_rounded,
-                    backgroundColor: value.cartItems.isNotEmpty
-                        ? Colors.blueAccent
-                        : Colors.grey.shade300,
+                    backgroundColor:
+                        Provider.of<CartBloc>(context).cartItems.isNotEmpty
+                            ? Colors.blueAccent
+                            : Colors.grey.shade300,
                   ),
                 ],
               ),
@@ -417,287 +466,333 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      physics: BouncingScrollPhysics(),
-      slivers: [
-        SliverAppBar(
-          backgroundColor: Colors.white,
-          stretch: true,
-          expandedHeight: 200,
-          elevation: 1,
-          flexibleSpace: FlexibleSpaceBar(
-            background: Container(
-              height: 200,
-              decoration: BoxDecoration(
-                color: Color(0xfffadacb),
-              ),
-              child: Stack(
-                children: [
-                  Align(
-                    alignment: Alignment(1.2, 2),
-                    child: Icon(
-                      CustomFilledIcons.fi_sr_time_check,
-                      size: 150,
-                      color: Colors.white54,
-                    ),
+    return Stack(
+      children: [
+        CustomScrollView(
+          physics: BouncingScrollPhysics(),
+          slivers: [
+            SliverAppBar(
+              backgroundColor: Colors.white,
+              stretch: true,
+              expandedHeight: 200,
+              elevation: 1,
+              flexibleSpace: FlexibleSpaceBar(
+                background: Container(
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: Colors.blueAccent,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 40),
-                        Text(
-                          "Day & Time",
-                          style: TextStyle(
-                            color: Colors.brown,
-                            fontSize: 36,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          "When can you come to the shop?",
-                          style: TextStyle(
-                            color: Colors.brown.shade300,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Consumer<CartBloc>(builder: (context, value, _) {
-            return Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "You need ${value.totalSlotsRequired} Slots",
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    "Please select a day and time for your reservation. If there is no slot available below, you can change the date to make a reservation on some other day.",
-                    style: TextStyle(),
-                  ),
-                ],
-              ),
-            );
-          }),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          height: 40,
-                          width: 40,
-                          child: Material(
-                            color: Colors.brown.shade400,
-                            shape: SquircleBorder(
-                              radius: 30.0,
-                            ),
-                            child: Icon(
-                              CustomFilledIcons.fi_sr_calendar,
-                              color: Colors.white,
-                              size: 22,
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 8,
-                        ),
-                        Text("Choose a date"),
-                      ],
-                    ),
-                    Container(
-                      height: 60.0,
-                      width: MediaQuery.of(context).size.width / 2.2,
-                      child: InkWell(
-                        onTap: () {
-                          showModalBottomSheet(
-                              isScrollControlled: true,
-                              elevation: 15,
-                              backgroundColor: Colors.white,
-                              context: context,
-                              builder: (context) {
-                                return Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(10.0),
-                                        child: Text(
-                                          "Choose a day",
-                                          style: TextStyle(
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.bold,
-                                            color:
-                                                Theme.of(context).primaryColor,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    CalendarDatePicker(
-                                      onDateChanged: (picked) {
-                                        setState(() {
-                                          date = formatter.format(picked);
-                                        });
-                                      },
-                                      firstDate: DateTime.now(),
-                                      initialDate: DateTime.parse(date),
-                                      lastDate: DateTime.now().add(
-                                        Duration(days: 365),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 20, vertical: 10),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          OutlineButton(
-                                            child: Text('Cancel'),
-                                            onPressed: () {
-                                              Navigator.pop(context, date);
-                                            },
-                                          ),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          MaterialButton(
-                                            color:
-                                                Theme.of(context).primaryColor,
-                                            child: Text('OK',
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                )),
-                                            onPressed: () {
-                                              Navigator.pop(context, date);
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                  ],
-                                );
-                              });
-                        },
-                        child: Material(
-                          clipBehavior: Clip.antiAlias,
-                          color: Colors.blueGrey.shade50,
-                          shape: SquircleBorder(
-                            radius: 30.0,
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 15),
-                            child: Center(child: Text(date)),
-                          ),
+                  child: Stack(
+                    children: [
+                      Align(
+                        alignment: Alignment(1.2, 2),
+                        child: Icon(
+                          CustomFilledIcons.fi_sr_time_check,
+                          size: 150,
+                          color: Colors.white30,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                Divider(
-                  height: 20,
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Row(
-                  children: [
-                    Text(
-                      "Time Slots for $date",
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                )
-              ],
-            ),
-          ),
-        ),
-        Consumer<CartBloc>(builder: (context, value, _) {
-          return SliverPadding(
-            padding: EdgeInsets.all(20),
-            sliver: SliverGrid(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final hourFrom = value.totalSlots.sublist(40, 93)[index];
-                  final hourTo = value.totalSlots.sublist(40, 93)[index + 1];
-                  return SlotTile(
-                    index: index + 40,
-                    from: hourFrom.format(context),
-                    to: hourTo.format(context),
-                    isReserved: false,
-                    onTap: () {
-                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                      List<int> _selection = [];
-                      _selection.clear();
-                      for (var i = 0; i < value.requiredSlot; i++) {
-                        _selection.add(index + i + 40);
-                      }
-                      if (index + 40 + value.requiredSlot <
-                              value.totalSlots.length - 4 &&
-                          !_selection.any((element) {
-                            return value.reservedSlots.contains(element);
-                          })) {
-                        value.currentSelection = _selection;
-                        value.update();
-                        print(value.currentSelection);
-                      } else {
-                        showSimpleNotification(
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 40),
                             Text(
-                              (index + 40 + value.requiredSlot >
-                                      value.totalSlots.sublist(40, 92).length +
-                                          40)
-                                  ? "Shop might be closed before we can serve you."
-                                  : "We might be serving someone else in this time",
+                              "Day & Time",
                               style: TextStyle(
                                 color: Colors.white,
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                            background: Colors.redAccent,
-                            position: NotificationPosition.bottom);
-                      }
-                    },
-                  );
-                },
-                childCount: value.totalSlots.sublist(40, 92).length,
-                addAutomaticKeepAlives: true,
-              ),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                childAspectRatio: 1,
-                crossAxisSpacing: 3,
-                mainAxisSpacing: 3,
-                crossAxisCount: 4,
+                            Text(
+                              "When can you come to the shop?",
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-          );
-        }),
-        SliverToBoxAdapter(
-          child: SizedBox(height: 100),
+            SliverToBoxAdapter(
+              child: Consumer<CartBloc>(builder: (context, value, _) {
+                return Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "You need ${value.durationToString(value.totalSlotsRequired * 15)}",
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        "Please select a day and time for your reservation. If there is no slot available below, you can change the date to make a reservation on some other day.",
+                        style: TextStyle(),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              height: 40,
+                              width: 40,
+                              child: Material(
+                                color: Colors.blueAccent,
+                                shape: SquircleBorder(
+                                  radius: BorderRadius.circular(30),
+                                ),
+                                child: Icon(
+                                  CustomFilledIcons.fi_sr_calendar,
+                                  color: Colors.white,
+                                  size: 22,
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 8,
+                            ),
+                            Text(
+                              "Choose a date",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          height: 60.0,
+                          width: MediaQuery.of(context).size.width / 2.2,
+                          child: InkWell(
+                            onTap: () {
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (context) {
+                                  return Container(
+                                      height: MediaQuery.of(context)
+                                              .copyWith()
+                                              .size
+                                              .height /
+                                          3,
+                                      child: CupertinoDatePicker(
+                                        onDateTimeChanged: (newdate) {
+                                          setState(() {
+                                            date = formatter.format(newdate);
+                                          });
+                                        },
+                                        use24hFormat: false,
+                                        minimumDate: DateTime.now(),
+                                        initialDateTime: DateTime.now(),
+                                        maximumDate: DateTime.now()
+                                            .add(Duration(days: 365)),
+                                        mode: CupertinoDatePickerMode.date,
+                                      ));
+                                },
+                              );
+                            },
+                            child: Material(
+                              clipBehavior: Clip.antiAlias,
+                              color: Colors.blueGrey.shade50,
+                              shape: SquircleBorder(
+                                radius: BorderRadius.circular(30),
+                              ),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 15),
+                                child: Center(
+                                  child: Text(
+                                    date,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Divider(
+                      height: 20,
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          "Time Slots for $date",
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      "Each of time slot is of 15 minutes. You can choose from the available slots that suits your needs.",
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Consumer<BookingScreenBloc>(builder: (context, value, _) {
+              return SliverPadding(
+                padding: EdgeInsets.all(20),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final hourFrom = value.totalTimeSlots.sublist(
+                          value.shopOpeningTimeIndex,
+                          value.shopClosingTimeIndex)[index];
+                      final hourTo = value.totalTimeSlots.sublist(
+                          value.shopOpeningTimeIndex,
+                          value.shopClosingTimeIndex)[index + 1];
+                      return SlotTile(
+                        index: index + value.shopOpeningTimeIndex,
+                        from: hourFrom.format(context),
+                        to: hourTo.format(context),
+                        isReserved: false,
+                        onTap: () {
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          List<int> _selection = [];
+                          _selection.clear();
+                          for (var i = 0; i < value.totalSlotsRequired; i++) {
+                            _selection
+                                .add(index + i + value.shopOpeningTimeIndex);
+                          }
+                          if (index +
+                                      value.shopOpeningTimeIndex +
+                                      value.totalSlotsRequired <
+                                  value.totalTimeSlots.length - 4 &&
+                              !_selection.any((element) {
+                                return value.occupiedTimeline.contains(element);
+                              })) {
+                            value.currentTimelineSelection = _selection;
+                            value.update();
+                            print(value.currentTimelineSelection);
+                          } else {
+                            bool result = index +
+                                    40 +
+                                    value.totalSlotsRequired >
+                                value.totalTimeSlots.sublist(40, 92).length +
+                                    40;
+                            Flushbar(
+                              title: "Please Choose some other slot",
+                              message: result
+                                  ? "Shop might be closed before we can serve you."
+                                  : "We might be serving someone else in this time.",
+                              duration: Duration(seconds: 3),
+                              animationDuration: Duration(milliseconds: 300),
+                              isDismissible: true,
+                              flushbarPosition: FlushbarPosition.TOP,
+                              flushbarStyle: FlushbarStyle.FLOATING,
+                              icon: CircleAvatar(
+                                backgroundColor: Colors.white,
+                                child: Icon(
+                                  result ? Icons.warning : Icons.done,
+                                ),
+                              ),
+                              shouldIconPulse: true,
+                            )..show(context);
+                          }
+                        },
+                      );
+                    },
+                    childCount: value.totalTimeSlots
+                        .sublist(value.shopOpeningTimeIndex,
+                            value.shopClosingTimeIndex)
+                        .length,
+                    addAutomaticKeepAlives: true,
+                  ),
+                ),
+              );
+            }),
+            SliverToBoxAdapter(
+              child: SizedBox(height: 100),
+            ),
+          ],
+        ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
+            color: Colors.white,
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Consumer<BookingScreenBloc>(builder: (context, value, _) {
+                return Row(
+                  children: [
+                    Button1(
+                      onTap: () {
+                        value.previousIndex = value.widgetIndex;
+                        value.widgetIndex--;
+                        value.update();
+                      },
+                      title: "Back",
+                      titleColor: Colors.white,
+                      iconData: Icons.arrow_back_rounded,
+                      backgroundColor: Colors.blueAccent,
+                    ),
+                    SizedBox(width: 12),
+                    Button2(
+                      onTap: () {
+                        if (value.currentTimelineSelection.isNotEmpty) {
+                          value.previousIndex = value.widgetIndex;
+                          value.widgetIndex++;
+                          value.update();
+                        } else {
+                          Flushbar(
+                            title: "No time slot selected!",
+                            message:
+                                "Please Choose some other slot a time slot to proceed with booking process.",
+                            duration: Duration(seconds: 3),
+                            animationDuration: Duration(milliseconds: 300),
+                            isDismissible: true,
+                            flushbarPosition: FlushbarPosition.TOP,
+                            flushbarStyle: FlushbarStyle.FLOATING,
+                            icon: CircleAvatar(
+                              backgroundColor: Colors.white,
+                              child: Icon(Icons.timer_outlined),
+                            ),
+                            shouldIconPulse: true,
+                          )..show(context);
+                        }
+                      },
+                      title: "Next",
+                      titleColor: Colors.white,
+                      iconData: Icons.arrow_forward_rounded,
+                      backgroundColor: value.currentTimelineSelection.isNotEmpty
+                          ? Colors.blueAccent
+                          : Colors.grey.shade300,
+                    ),
+                  ],
+                );
+              }),
+            ),
+          ),
         ),
       ],
     );
@@ -712,60 +807,192 @@ class PaymentMethodScreen extends StatefulWidget {
 class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      physics: BouncingScrollPhysics(),
-      slivers: [
-        SliverAppBar(
-          backgroundColor: Colors.white,
-          stretch: true,
-          expandedHeight: 160,
-          elevation: 1,
-          flexibleSpace: FlexibleSpaceBar(
-            background: Container(
-              height: 160,
-              decoration: BoxDecoration(
-                color: Color(0xfffadacb),
-              ),
-              child: Stack(
-                children: [
-                  Align(
-                    alignment: Alignment(1.2, 2),
-                    child: Icon(
-                      CustomFilledIcons.fi_sr_time_check,
-                      size: 150,
-                      color: Colors.white54,
-                    ),
+    return Stack(
+      children: [
+        CustomScrollView(
+          physics: BouncingScrollPhysics(),
+          slivers: [
+            SliverAppBar(
+              backgroundColor: Colors.white,
+              stretch: true,
+              expandedHeight: 200,
+              elevation: 1,
+              flexibleSpace: FlexibleSpaceBar(
+                background: Container(
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: Colors.blueAccent,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 40),
-                        Text(
-                          "Payment",
-                          style: TextStyle(
-                            color: Colors.brown,
-                            fontSize: 36,
-                            fontWeight: FontWeight.bold,
-                          ),
+                  child: Stack(
+                    children: [
+                      Align(
+                        alignment: Alignment(1.2, 2),
+                        child: Icon(
+                          CustomFilledIcons.fi_sr_time_check,
+                          size: 150,
+                          color: Colors.white30,
                         ),
-                        Text(
-                          "How would you like pay for the services?",
-                          style: TextStyle(
-                            color: Colors.brown.shade300,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 40),
+                            Text(
+                              "Payment",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              "How would you like pay for the services?",
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
+            Consumer<BookingScreenBloc>(builder: (context, value, _) {
+              return SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          PaymentButton(
+                            index: 0,
+                            title: "Cash at shop",
+                            titleColor: Colors.white,
+                            iconData: FontAwesomeIcons.dollarSign,
+                            backgroundColor: Colors.blueAccent,
+                            onTap: () {
+                              value.paymentIndex = 0;
+                              value.update();
+                            },
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20),
+                      Row(
+                        children: [
+                          PaymentButton(
+                            index: 1,
+                            title: "Stripe",
+                            titleColor: Colors.white,
+                            iconData: FontAwesomeIcons.stripeS,
+                            backgroundColor: Colors.blueAccent,
+                            onTap: () {
+                              value.paymentIndex = 1;
+                              value.widgetIndex++;
+                              value.update();
+                            },
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20),
+                      Row(
+                        children: [
+                          PaymentButton(
+                            index: 2,
+                            title: "Paypal",
+                            titleColor: Colors.white,
+                            iconData: FontAwesomeIcons.paypal,
+                            backgroundColor: Colors.blueAccent,
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (BuildContext context) =>
+                                      PaypalPayment(
+                                    onFinish: (number) async {
+                                      // payment done
+                                      // showSimpleNotification(
+                                      //   Text(
+                                      //     "Payment via Paypal is successful.",
+                                      //   ),
+                                      //   background: Colors.green,
+                                      // );
+                                      value.paymentIndex = 1;
+                                      value.widgetIndex++;
+                                      value.update();
+
+                                      print('order id: ' + number);
+                                    },
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            })
+          ],
+        ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
+            color: Colors.white,
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Consumer<BookingScreenBloc>(builder: (context, value, _) {
+                return Row(
+                  children: [
+                    Button1(
+                      onTap: () {
+                        value.previousIndex = value.widgetIndex;
+                        value.widgetIndex--;
+                        value.update();
+                      },
+                      title: "Back",
+                      titleColor: Colors.white,
+                      iconData: Icons.arrow_back_rounded,
+                      backgroundColor: Colors.blueAccent,
+                    ),
+                    SizedBox(width: 12),
+                    Button2(
+                      onTap: () {
+                        if (value.currentTimelineSelection.isNotEmpty) {
+                          value.previousIndex = value.widgetIndex;
+                          value.widgetIndex++;
+                          value.update();
+                        } else {
+                          // showSimpleNotification(
+                          //   Text(
+                          //     "Please choose a time slot to continue the booking process!",
+                          //   ),
+                          //   background: Colors.amber.shade900,
+                          //   duration: Duration(seconds: 3),
+                          // );
+                        }
+                      },
+                      title: "Next",
+                      titleColor: Colors.white,
+                      iconData: Icons.arrow_forward_rounded,
+                      backgroundColor: value.currentTimelineSelection.isNotEmpty
+                          ? Colors.blueAccent
+                          : Colors.grey.shade300,
+                    ),
+                  ],
+                );
+              }),
+            ),
           ),
-        )
+        ),
       ],
     );
   }
@@ -776,60 +1003,131 @@ class BookingSuccessScreen extends StatefulWidget {
   _BookingSuccessScreenState createState() => _BookingSuccessScreenState();
 }
 
-class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
+class _BookingSuccessScreenState extends State<BookingSuccessScreen>
+    with SingleTickerProviderStateMixin {
+  AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      physics: BouncingScrollPhysics(),
-      slivers: [
-        SliverAppBar(
-          backgroundColor: Colors.white,
-          stretch: true,
-          expandedHeight: 160,
-          elevation: 1,
-          flexibleSpace: FlexibleSpaceBar(
-            background: Container(
-              height: 160,
-              decoration: BoxDecoration(
-                color: Color(0xfffadacb),
-              ),
-              child: Stack(
-                children: [
-                  Align(
-                    alignment: Alignment(1.2, 2),
-                    child: Icon(
-                      CustomFilledIcons.fi_sr_time_check,
-                      size: 150,
-                      color: Colors.white54,
-                    ),
+    return Stack(
+      children: [
+        CustomScrollView(
+          physics: BouncingScrollPhysics(),
+          slivers: [
+            SliverAppBar(
+              backgroundColor: Colors.white,
+              stretch: true,
+              expandedHeight: 200,
+              elevation: 1,
+              automaticallyImplyLeading: false,
+              flexibleSpace: FlexibleSpaceBar(
+                background: Container(
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: Colors.blueAccent,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 40),
-                        Text(
-                          "All Done",
-                          style: TextStyle(
-                            color: Colors.brown,
-                            fontSize: 36,
-                            fontWeight: FontWeight.bold,
-                          ),
+                  child: Stack(
+                    children: [
+                      Align(
+                        alignment: Alignment(1.2, 2),
+                        child: Icon(
+                          CustomFilledIcons.fi_sr_trophy,
+                          size: 150,
+                          color: Colors.white30,
                         ),
-                        Text(
-                          "Reserveration is done and we've it in our registers.",
-                          style: TextStyle(
-                            color: Colors.brown.shade300,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 40),
+                            Text(
+                              "All Done",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              "Reserveration is done and we have it in our registers.",
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
+            ),
+            SliverToBoxAdapter(
+              child: Container(
+                height: 500,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      height: 300,
+                      width: MediaQuery.of(context).size.width - 100,
+                      child: Lottie.asset(
+                        "assets/lotte_animations/done.json",
+                        controller: _controller,
+                        onLoaded: (composition) {
+                          // Configure the AnimationController with the duration of the
+                          // Lottie file and start the animation.
+                          _controller
+                            ..duration = composition.duration
+                            ..forward();
+                        },
+                      ),
+                    ),
+                    Text(
+                      "Service reservation is successful",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              children: [
+                Button1(
+                  onTap: () {
+                    Navigator.popUntil(context, (route) => route.isFirst);
+                  },
+                  title: "Navigate to Home",
+                  titleColor: Colors.white,
+                  iconData: CustomIcons.fi_rr_home,
+                  backgroundColor: Colors.blueAccent,
+                ),
+              ],
             ),
           ),
         )

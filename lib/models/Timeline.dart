@@ -2,20 +2,20 @@ import 'package:flutter/material.dart';
 
 class Timeline {
   String id;
-  final String date;
-  final List<int> slotsReserved;
+  final DateTime date;
+  final List<int> timelineSpan;
 
   Timeline({
     this.id = "",
     @required this.date,
-    @required this.slotsReserved,
+    @required this.timelineSpan,
   });
 
-  factory Timeline.fromMap(Map<String, dynamic> reservedHours) {
+  factory Timeline.fromMap(Map<String, dynamic> item) {
     return Timeline(
-      id: reservedHours["id"],
-      date: reservedHours["date"],
-      slotsReserved: reservedHours["slotsReserved"],
+      id: item["id"],
+      date: item["date"],
+      timelineSpan: item["timelineSpan"],
     );
   }
 
@@ -23,7 +23,7 @@ class Timeline {
     return {
       "id": id,
       "date": date,
-      "slotsReserved": slotsReserved.cast<int>(),
+      "timelineSpan": timelineSpan.cast<int>(),
     };
   }
 }

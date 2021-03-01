@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:cupertino_rounded_corners/cupertino_rounded_corners.dart';
 import 'package:flutter/material.dart';
-import 'package:overlay_support/overlay_support.dart';
 import 'package:provider/provider.dart';
 import 'package:scheduler/blocs/CartBloc.dart';
 import 'package:scheduler/models/ServiceModel.dart';
@@ -110,10 +109,12 @@ class _QuickServiceTileState extends State<QuickServiceTile> {
       margin: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
       child: Consumer<CartBloc>(builder: (context, value, _) {
         return Material(
-          elevation: 6,
+          elevation: 10,
           shadowColor: Colors.blueGrey.shade50.withOpacity(0.5),
-          shape: SquircleBorder(radius: 20),
-          color: Colors.grey.shade100,
+          shape: SquircleBorder(
+            radius: BorderRadius.circular(20),
+          ),
+          color: Colors.grey.shade50,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
             child: Row(
@@ -166,9 +167,9 @@ class _QuickServiceTileState extends State<QuickServiceTile> {
                       ),
                       onPressed: () {
                         value.removeFromCart(widget.serviceItem);
-                        showSimpleNotification(
-                          Text("${widget.serviceItem.name} removed from cart."),
-                        );
+                        // showSimpleNotification(
+                        //   Text("${widget.serviceItem.name} removed from cart."),
+                        // );
                       },
                     ),
                   ],

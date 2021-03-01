@@ -7,6 +7,7 @@ class Reservation {
   final List<ServiceItem> listOfServices;
   final String date;
   final List<int> slots;
+  final int paymentMethod;
 
   Reservation({
     this.id = '',
@@ -14,6 +15,7 @@ class Reservation {
     @required this.listOfServices,
     @required this.date,
     @required this.slots,
+    @required this.paymentMethod,
   });
 
   factory Reservation.fromMap(Map<String, dynamic> reservation) {
@@ -23,6 +25,7 @@ class Reservation {
       listOfServices: reservation["listOfServices"],
       date: reservation["date"],
       slots: reservation["slots"],
+      paymentMethod: reservation["paymentMethod"],
     );
   }
 
@@ -33,6 +36,7 @@ class Reservation {
       "listOfServices": listOfServices,
       "date": date,
       "slots": slots,
+      "paymentMethod": paymentMethod,
     };
   }
 }

@@ -86,7 +86,7 @@ class _AppointmentTileState extends State<AppointmentTile> {
             child: Container(
               margin: EdgeInsets.all(5),
               child: Material(
-                shape: SquircleBorder(radius: 30),
+                shape: SquircleBorder(radius: BorderRadius.circular(30),),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -140,7 +140,7 @@ class _AppointmentTileState extends State<AppointmentTile> {
             height: 130,
             width: MediaQuery.of(context).size.width - 135,
             child: Material(
-              shape: SquircleBorder(radius: 30),
+              shape: SquircleBorder(radius: BorderRadius.circular(30),),
               child: Column(
                 children: [
                   SizedBox(height: 10),
@@ -174,7 +174,7 @@ class _AppointmentTileState extends State<AppointmentTile> {
                           child: Material(
                             clipBehavior: Clip.antiAlias,
                             color: Colors.blueGrey.shade50,
-                            shape: SquircleBorder(radius: 30),
+                            shape: SquircleBorder(radius: BorderRadius.circular(30),),
                             child: Image.asset('assets/avatar.png'),
                           ),
                         ),

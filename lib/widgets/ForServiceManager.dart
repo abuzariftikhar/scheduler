@@ -44,14 +44,14 @@ class _ServiceTileState extends State<ServiceTile> {
               elevation: 1,
               clipBehavior: Clip.antiAlias,
               shape: SquircleBorder(
-                radius: 30.0,
+                radius: BorderRadius.circular(30),
               ),
               child: Row(
                 children: [
                   Material(
                     color: Colors.white,
                     shape: SquircleBorder(
-                      radius: 30.0,
+                      radius: BorderRadius.circular(30),
                     ),
                     child: Container(
                       margin: EdgeInsets.symmetric(horizontal: 3, vertical: 3),
@@ -61,7 +61,7 @@ class _ServiceTileState extends State<ServiceTile> {
                         clipBehavior: Clip.antiAlias,
                         color: Colors.white,
                         shape: SquircleBorder(
-                          radius: 30.0,
+                          radius: BorderRadius.circular(30),
                         ),
                         child: FadeInImage.assetNetwork(
                           fadeInCurve: Curves.easeIn,

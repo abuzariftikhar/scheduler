@@ -1,10 +1,11 @@
 import 'dart:ui';
 
+import 'package:another_flushbar/flushbar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cupertino_rounded_corners/cupertino_rounded_corners.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:overlay_support/overlay_support.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:scheduler/blocs/AuthenticationBloc.dart';
 import 'package:scheduler/blocs/BookingScreenBloc.dart';
@@ -295,35 +296,37 @@ class _CustomerHomeState extends State<CustomerHome> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          Consumer<CustomerHomeBloc>(
-            builder: (context, value, _) {
-              return AnimatedSwitcher(
-                  duration: Duration(milliseconds: 300),
-                  reverseDuration: Duration(milliseconds: 10),
-                  transitionBuilder: (child, animation) {
-                    return SlideTransition(
-                      position: Tween<Offset>(
-                              begin: value.index > value.previousIndex
-                                  ? Offset(0.2, 0)
-                                  : Offset(-0.2, 0),
-                              end: Offset(0, 0))
-                          .chain(CurveTween(curve: Curves.easeOutCirc))
-                          .animate(animation),
-                      child: child,
-                    );
-                  },
-                  child: _getHomeScreen(value.index));
-            },
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: CustomBottomBar(),
-          ),
-        ],
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Stack(
+          children: [
+            Consumer<CustomerHomeBloc>(
+              builder: (context, value, _) {
+                return AnimatedSwitcher(
+                    duration: Duration(milliseconds: 400),
+                    reverseDuration: Duration(milliseconds: 1),
+                    transitionBuilder: (child, animation) {
+                      return SlideTransition(
+                        position: Tween<Offset>(
+                                begin: value.index > value.previousIndex
+                                    ? Offset(1, 0)
+                                    : Offset(-1, 0),
+                                end: Offset(0, 0))
+                            .chain(CurveTween(curve: Curves.easeOutCirc))
+                            .animate(animation),
+                        child: child,
+                      );
+                    },
+                    child: _getHomeScreen(value.index));
+              },
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: CustomBottomBar(),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -346,7 +349,7 @@ class HomeServiceTile extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         color: Colors.grey.shade100,
         shape: SquircleBorder(
-          radius: 30,
+          radius: BorderRadius.circular(30),
         ),
         child: Consumer<CustomerHomeBloc>(builder: (context, value, _) {
           return InkWell(
@@ -386,7 +389,7 @@ class HomeServiceTile extends StatelessWidget {
                         width: 130,
                         child: Material(
                           shape: SquircleBorder(
-                            radius: 30,
+                            radius: BorderRadius.circular(30),
                           ),
                           color: Colors.white,
                           clipBehavior: Clip.antiAlias,
@@ -494,7 +497,9 @@ class _HomeServiceTile2State extends State<HomeServiceTile2> {
         elevation: 6,
         shadowColor: Colors.blueGrey.shade50.withOpacity(0.5),
         color: Colors.grey.shade100,
-        shape: SquircleBorder(radius: 30),
+        shape: SquircleBorder(
+          radius: BorderRadius.circular(30),
+        ),
         child: InkWell(
           onTap: () {
             Navigator.push(
@@ -566,13 +571,25 @@ class _HomeServiceTile2State extends State<HomeServiceTile2> {
                           return GestureDetector(
                             onTap: () {
                               bool result = value.addtocart(widget.serviceItem);
-                              showSimpleNotification(
-                                Text(
-                                  result
-                                      ? "${widget.serviceItem.name} already present in cart."
-                                      : "${widget.serviceItem.name} added to cart.",
+                              Flushbar(
+                                title:
+                                    result ? "Already Present" : "Item Added",
+                                message: result
+                                    ? "${widget.serviceItem.name} already present in cart."
+                                    : "${widget.serviceItem.name} added to cart.",
+                                duration: Duration(seconds: 3),
+                                animationDuration: Duration(milliseconds: 300),
+                                isDismissible: true,
+                                flushbarPosition: FlushbarPosition.TOP,
+                                flushbarStyle: FlushbarStyle.FLOATING,
+                                icon: CircleAvatar(
+                                  backgroundColor: Colors.white,
+                                  child: Icon(
+                                    result ? Icons.warning : Icons.done,
+                                  ),
                                 ),
-                              );
+                                shouldIconPulse: true,
+                              )..show(context);
                             },
                             child: Container(
                               width: 100,
@@ -631,7 +648,7 @@ class _HomeServiceTile2State extends State<HomeServiceTile2> {
                 padding: EdgeInsets.all(2),
                 child: Material(
                   shape: SquircleBorder(
-                    radius: 30,
+                    radius: BorderRadius.circular(30),
                   ),
                   color: Colors.white,
                   clipBehavior: Clip.antiAlias,
@@ -683,24 +700,30 @@ class _HomeLandingState extends State<HomeLanding> {
                 Consumer<AuthenticationBloc>(builder: (context, value, _) {
                   return GestureDetector(
                     onTap: () {
-                      value.signOut();
-                      Navigator.pushReplacement(context, PageRouteBuilder(
+                      Navigator.push(context, PageRouteBuilder(
                           pageBuilder: (context, animation, animation2) {
                         return FadeTransition(
                           opacity: animation,
-                          child: LandingScreen(),
+                          child: ProfileScreen(),
                         );
                       }));
                     },
-                    child: Container(
-                      clipBehavior: Clip.hardEdge,
-                      height: 40,
-                      width: 40,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(25.0),
-                        color: Colors.blueGrey.shade50,
+                    child: Hero(
+                      tag: "profilePic",
+                      child: Container(
+                        clipBehavior: Clip.hardEdge,
+                        height: 40,
+                        width: 40,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(25.0),
+                          color: Colors.blueGrey.shade50,
+                        ),
+                        child: Image.asset(
+                          "assets/avatar.png",
+                          fit: BoxFit.cover,
+                          filterQuality: FilterQuality.high,
+                        ),
                       ),
-                      child: Image.asset("assets/avatar.png"),
                     ),
                   );
                 })
@@ -713,7 +736,9 @@ class _HomeLandingState extends State<HomeLanding> {
             margin: EdgeInsets.symmetric(horizontal: 20),
             height: 60,
             child: Material(
-              shape: SquircleBorder(radius: 20),
+              shape: SquircleBorder(
+                radius: BorderRadius.circular(30),
+              ),
               color: Colors.blueGrey.shade50,
               child: Row(
                 children: [
@@ -772,7 +797,9 @@ class _HomeLandingState extends State<HomeLanding> {
                     width: MediaQuery.of(context).size.width,
                     child: Material(
                       elevation: 1,
-                      shape: SquircleBorder(radius: 50),
+                      shape: SquircleBorder(
+                        radius: BorderRadius.circular(30),
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.all(20.0),
                         child: Column(
@@ -859,7 +886,9 @@ class _HomeCaroselTileState extends State<HomeCaroselTile> {
           shadowColor: Colors.blueGrey.shade50.withOpacity(0.5),
           clipBehavior: Clip.antiAlias,
           color: Colors.blueGrey.shade50,
-          shape: SquircleBorder(radius: 30),
+          shape: SquircleBorder(
+            radius: BorderRadius.circular(30),
+          ),
           child: InkWell(
             splashColor: Colors.white24,
             onTap: () {
@@ -892,7 +921,9 @@ class _HomeCaroselTileState extends State<HomeCaroselTile> {
                   padding: const EdgeInsets.all(2),
                   child: Material(
                     clipBehavior: Clip.antiAlias,
-                    shape: SquircleBorder(radius: 30),
+                    shape: SquircleBorder(
+                      radius: BorderRadius.circular(30),
+                    ),
                     child: Container(
                       height: 260,
                       width: MediaQuery.of(context).size.width,
@@ -967,13 +998,30 @@ class _HomeCaroselTileState extends State<HomeCaroselTile> {
                                       onTap: () async {
                                         bool result =
                                             value.addtocart(widget.serviceItem);
-                                        showSimpleNotification(
-                                          Text(
-                                            result
-                                                ? "${widget.serviceItem.name} already present in cart."
-                                                : "${widget.serviceItem.name} added to cart.",
+                                        Flushbar(
+                                          title: result
+                                              ? "Already Present"
+                                              : "Item Added",
+                                          message: result
+                                              ? "${widget.serviceItem.name} already present in cart."
+                                              : "${widget.serviceItem.name} added to cart.",
+                                          duration: Duration(seconds: 3),
+                                          animationDuration:
+                                              Duration(milliseconds: 300),
+                                          isDismissible: true,
+                                          flushbarPosition:
+                                              FlushbarPosition.TOP,
+                                          flushbarStyle: FlushbarStyle.FLOATING,
+                                          icon: CircleAvatar(
+                                            backgroundColor: Colors.white,
+                                            child: Icon(
+                                              result
+                                                  ? Icons.warning
+                                                  : Icons.done,
+                                            ),
                                           ),
-                                        );
+                                          shouldIconPulse: true,
+                                        )..show(context);
                                       },
                                       child: Container(
                                         margin: EdgeInsets.only(top: 5),
@@ -1051,7 +1099,7 @@ class _HomeServicesState extends State<HomeServices> {
               background: Container(
                 height: 160,
                 decoration: BoxDecoration(
-                  color: Colors.blueAccent.shade100,
+                  color: Colors.blueAccent,
                 ),
                 child: Stack(
                   children: [
@@ -1060,7 +1108,7 @@ class _HomeServicesState extends State<HomeServices> {
                       child: Icon(
                         CustomFilledIcons.fi_sr_asterisk,
                         size: 150,
-                        color: Colors.white54,
+                        color: Colors.black12,
                       ),
                     ),
                     Padding(
@@ -1073,21 +1121,21 @@ class _HomeServicesState extends State<HomeServices> {
                           Text(
                             "Browse",
                             style: TextStyle(
-                                color: Colors.black87,
+                                color: Colors.white54,
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold),
                           ),
                           Text(
                             "Services",
                             style: TextStyle(
-                                color: Colors.black,
+                                color: Colors.white,
                                 fontSize: 36,
                                 fontWeight: FontWeight.bold),
                           ),
                           Text(
                             "All the best in-class services at your finger tips.",
                             style: TextStyle(
-                                color: Colors.black87,
+                                color: Colors.white60,
                                 fontWeight: FontWeight.bold),
                           ),
                         ],
@@ -1242,7 +1290,9 @@ class HomeServiceFilter extends StatelessWidget {
         height: 60,
         child: Material(
           clipBehavior: Clip.antiAlias,
-          shape: SquircleBorder(radius: 40),
+          shape: SquircleBorder(
+            radius: BorderRadius.circular(40),
+          ),
           child: InkWell(
             onTap: () {
               value.filterTitle = title;
@@ -1263,7 +1313,9 @@ class HomeServiceFilter extends StatelessWidget {
                     width: 60,
                     child: Material(
                       color: Colors.white,
-                      shape: SquircleBorder(radius: 40),
+                      shape: SquircleBorder(
+                        radius: BorderRadius.circular(40),
+                      ),
                       child: AnimatedSwitcher(
                           duration: Duration(milliseconds: 300),
                           child: index == value.filterIndex
@@ -1305,7 +1357,28 @@ class HomeServiceFilter extends StatelessWidget {
   }
 }
 
-class HomeCart extends StatelessWidget {
+class HomeCart extends StatefulWidget {
+  @override
+  _HomeCartState createState() => _HomeCartState();
+}
+
+class _HomeCartState extends State<HomeCart>
+    with SingleTickerProviderStateMixin {
+  AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -1322,7 +1395,7 @@ class HomeCart extends StatelessWidget {
                 background: Container(
                   height: 160,
                   decoration: BoxDecoration(
-                    color: Colors.blueAccent.shade100,
+                    color: Colors.blueAccent,
                   ),
                   child: Stack(
                     children: [
@@ -1331,7 +1404,7 @@ class HomeCart extends StatelessWidget {
                         child: Icon(
                           CustomFilledIcons.fi_sr_shopping_bag,
                           size: 150,
-                          color: Colors.white54,
+                          color: Colors.black12,
                         ),
                       ),
                       Padding(
@@ -1344,7 +1417,7 @@ class HomeCart extends StatelessWidget {
                             Text(
                               "Cart",
                               style: TextStyle(
-                                color: Colors.black,
+                                color: Colors.white,
                                 fontSize: 36,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -1352,7 +1425,7 @@ class HomeCart extends StatelessWidget {
                             Text(
                               "We'd love to give our best services just add them in here.",
                               style: TextStyle(
-                                color: Colors.black87,
+                                color: Colors.white60,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -1474,11 +1547,20 @@ class HomeCart extends StatelessWidget {
                         Container(
                           height: 230,
                           width: 230,
-                          child: Image.asset("assets/nothing.png"),
+                          child: Lottie.asset(
+                            "assets/lotte_animations/empty_cart.json",
+                            controller: _controller,
+                            onLoaded: (composition) {
+                              _controller
+                                ..duration = composition.duration
+                                ..repeat();
+                            },
+                          ),
                         ),
                         Text(
-                          "Services you'll add to cart will appear here.",
+                          "Your cart looks empty!",
                           style: TextStyle(
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: Colors.blueGrey,
                           ),
@@ -1525,7 +1607,10 @@ class HomeCart extends StatelessWidget {
                                     .animate(animation),
                                 child: ChangeNotifierProvider(
                                     create: (context) => BookingScreenBloc(),
-                                    child: BookServiceScreen()),
+                                    child: ChangeNotifierProvider(
+                                        create: (context) =>
+                                            BookingScreenBloc(),
+                                        child: BookServiceScreen())),
                               );
                             },
                           ),
@@ -1559,7 +1644,7 @@ class HomeMyReservations extends StatelessWidget {
               background: Container(
                 height: 160,
                 decoration: BoxDecoration(
-                  color: Colors.blueAccent.shade100,
+                  color: Colors.blueAccent,
                 ),
                 child: Stack(
                   children: [
@@ -1568,7 +1653,7 @@ class HomeMyReservations extends StatelessWidget {
                       child: Icon(
                         CustomFilledIcons.fi_sr_receipt,
                         size: 150,
-                        color: Colors.white54,
+                        color: Colors.black12,
                       ),
                     ),
                     Padding(
@@ -1581,14 +1666,14 @@ class HomeMyReservations extends StatelessWidget {
                           Text(
                             "My Reservations",
                             style: TextStyle(
-                                color: Colors.black,
+                                color: Colors.white,
                                 fontSize: 36,
                                 fontWeight: FontWeight.bold),
                           ),
                           Text(
                             "All of your reservations in one place.",
                             style: TextStyle(
-                                color: Colors.black87,
+                                color: Colors.white60,
                                 fontWeight: FontWeight.bold),
                           ),
                         ],
@@ -1598,107 +1683,226 @@ class HomeMyReservations extends StatelessWidget {
                 ),
               ),
             )),
-        SliverList(
-          delegate: SliverChildListDelegate(
-            [
-              Container(
-                height: MediaQuery.of(context).size.width - 100,
-                child: PageView.builder(
-                  scrollDirection: Axis.horizontal,
-                  physics: BouncingScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    return Container(
-                      margin: EdgeInsets.all(
-                        20,
-                      ),
-                      height: MediaQuery.of(context).size.width - 100,
-                      width: MediaQuery.of(context).size.width - 100,
-                      child: Material(
-                        color: Colors.blueGrey.shade50,
-                        shape: SquircleBorder(radius: 50),
-                        child: Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Stack(
-                            children: [
-                              Container(
-                                width: MediaQuery.of(context).size.width - 40,
-                                height: 50,
-                                color: Colors.amber,
-                                child: Stack(
-                                  children: [],
-                                ),
-                              ),
-                              Align(
-                                alignment: Alignment.topCenter,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        Text(
-                                          "Reservation Date",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.blueGrey,
-                                          ),
-                                        ),
-                                        Text(
-                                          "Feburary 20, 2021",
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w900,
-                                            color: Colors.blueGrey.shade700,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Container(
-                                      height: 40,
-                                      width: 1,
-                                      margin:
-                                          EdgeInsets.symmetric(horizontal: 15),
-                                      color: Colors.blueGrey,
-                                    ),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "Time",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.blueGrey,
-                                          ),
-                                        ),
-                                        Text(
-                                          "10 : 00 AM ",
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w900,
-                                            color: Colors.blueGrey.shade700,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                  itemCount: 10,
-                ),
-              )
-            ],
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 30, left: 20),
+            child: Text(
+              "Reservations",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                fontSize: 36,
+              ),
+            ),
           ),
         ),
+        SliverList(
+            delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            return Container(
+              margin: EdgeInsets.all(
+                20,
+              ),
+              height: 320,
+              width: MediaQuery.of(context).size.width - 100,
+              child: Material(
+                elevation: 10,
+                color: Colors.blueGrey.shade50,
+                shadowColor: Colors.blueGrey.withOpacity(0.3),
+                shape: SquircleBorder(
+                  radius: BorderRadius.circular(40),
+                ),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Text(
+                        "Reservation No: S-6540",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blueGrey.shade900,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Total Cost",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blueGrey,
+                                ),
+                              ),
+                              Text(
+                                "\$120",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.blueGrey.shade700,
+                                ),
+                              ),
+                              SizedBox(height: 3),
+                              Text(
+                                "Payment Method",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blueGrey,
+                                ),
+                              ),
+                              Text(
+                                "Cash at Shop",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.blueGrey.shade700,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            height: 75,
+                            width: 1,
+                            margin: EdgeInsets.symmetric(horizontal: 15),
+                            color: Colors.blueGrey,
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Reservation Date",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blueGrey,
+                                ),
+                              ),
+                              Text(
+                                "Feburary 20, 2021",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.blueGrey.shade700,
+                                ),
+                              ),
+                              SizedBox(height: 3),
+                              Text(
+                                "Starts at",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blueGrey,
+                                ),
+                              ),
+                              Text(
+                                "10:00 AM",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.blueGrey.shade700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              left: 20, bottom: 5, top: 20),
+                          child: Text(
+                            "Services selected",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blueGrey,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      height: 100,
+                      child: ListView.builder(
+                        itemBuilder: (context, index) {
+                          return Container(
+                            margin:
+                                EdgeInsets.only(top: 5, bottom: 5, left: 10),
+                            width: 140,
+                            child: Material(
+                              shape: SquircleBorder(
+                                radius: BorderRadius.circular(30),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          "Cost",
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w900,
+                                            color: Colors.blueGrey,
+                                          ),
+                                        ),
+                                        Text(
+                                          "\$120",
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w900,
+                                            color: Colors.blueGrey,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Text(
+                                      "Hair Cutting",
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w900,
+                                        color: Colors.blueGrey,
+                                      ),
+                                    ),
+                                    Text(
+                                      "Faded Pompadour Men's Haircut",
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w900,
+                                        color: Colors.blueGrey,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                        physics: BouncingScrollPhysics(),
+                        scrollDirection: Axis.horizontal,
+                        itemCount: 3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+          childCount: 5,
+        )),
+        SliverToBoxAdapter(child: SizedBox(height: 90)),
       ],
     );
   }
@@ -1756,8 +1960,8 @@ class _ServiceDetailsViewState extends State<ServiceDetailsView> {
                         PageView.builder(
                           itemBuilder: (context, index) {
                             String image = widget.serviceItem.imageURLs[index];
-                            return CachedNetworkImage(
-                              imageUrl: image,
+                            return Image.network(
+                              image,
                               alignment: Alignment.center,
                               fit: BoxFit.cover,
                             );
@@ -1825,7 +2029,9 @@ class _ServiceDetailsViewState extends State<ServiceDetailsView> {
                             children: [
                               Material(
                                 color: Colors.blueGrey.withOpacity(0.1),
-                                shape: SquircleBorder(radius: 40),
+                                shape: SquircleBorder(
+                                  radius: BorderRadius.circular(40),
+                                ),
                                 child: Padding(
                                   padding: const EdgeInsets.all(15),
                                   child: Icon(
@@ -1877,7 +2083,9 @@ class _ServiceDetailsViewState extends State<ServiceDetailsView> {
                             children: [
                               Material(
                                 color: Colors.blueGrey.withOpacity(0.1),
-                                shape: SquircleBorder(radius: 40),
+                                shape: SquircleBorder(
+                                  radius: BorderRadius.circular(40),
+                                ),
                                 child: Padding(
                                   padding: const EdgeInsets.all(15),
                                   child: Icon(CustomFilledIcons.fi_sr_stopwatch,
@@ -1927,7 +2135,9 @@ class _ServiceDetailsViewState extends State<ServiceDetailsView> {
                             children: [
                               Material(
                                 color: Colors.blueGrey.withOpacity(0.1),
-                                shape: SquircleBorder(radius: 40),
+                                shape: SquircleBorder(
+                                  radius: BorderRadius.circular(40),
+                                ),
                                 child: Padding(
                                   padding: const EdgeInsets.all(15),
                                   child: Icon(
@@ -1978,7 +2188,9 @@ class _ServiceDetailsViewState extends State<ServiceDetailsView> {
                           horizontal: 20, vertical: 10),
                       child: Material(
                         color: Colors.blueGrey.withOpacity(0.1),
-                        shape: SquircleBorder(radius: 40),
+                        shape: SquircleBorder(
+                          radius: BorderRadius.circular(40),
+                        ),
                         child: Padding(
                           padding: const EdgeInsets.all(15),
                           child: Text(
@@ -2007,7 +2219,9 @@ class _ServiceDetailsViewState extends State<ServiceDetailsView> {
               width: MediaQuery.of(context).size.width,
               child: Material(
                 elevation: 8,
-                shape: SquircleBorder(radius: 20),
+                shape: SquircleBorder(
+                  radius: BorderRadius.circular(20),
+                ),
                 clipBehavior: Clip.antiAlias,
                 color: Colors.transparent,
                 child: Consumer<CartBloc>(builder: (context, cartbloc, _) {
@@ -2019,13 +2233,25 @@ class _ServiceDetailsViewState extends State<ServiceDetailsView> {
                             splashColor: Colors.white24,
                             onTap: () {
                               bool result = value.addtocart(widget.serviceItem);
-                              showSimpleNotification(
-                                Text(
-                                  result
-                                      ? "${widget.serviceItem.name} already present in cart."
-                                      : "${widget.serviceItem.name} added to cart.",
+                              Flushbar(
+                                title:
+                                    result ? "Already Present" : "Item Added",
+                                message: result
+                                    ? "${widget.serviceItem.name} already present in cart."
+                                    : "${widget.serviceItem.name} added to cart.",
+                                duration: Duration(seconds: 3),
+                                animationDuration: Duration(milliseconds: 300),
+                                isDismissible: true,
+                                flushbarPosition: FlushbarPosition.TOP,
+                                flushbarStyle: FlushbarStyle.FLOATING,
+                                icon: CircleAvatar(
+                                  backgroundColor: Colors.white,
+                                  child: Icon(
+                                    result ? Icons.warning : Icons.done,
+                                  ),
                                 ),
-                              );
+                                shouldIconPulse: true,
+                              )..show(context);
 
                               Navigator.push(
                                 context,
@@ -2073,13 +2299,24 @@ class _ServiceDetailsViewState extends State<ServiceDetailsView> {
                           splashColor: Colors.red,
                           onTap: () {
                             bool result = value.addtocart(widget.serviceItem);
-                            showSimpleNotification(
-                              Text(
-                                result
-                                    ? "${widget.serviceItem.name} already present in cart."
-                                    : "${widget.serviceItem.name} added to cart.",
+                            Flushbar(
+                              title: result ? "Already Present" : "Item Added",
+                              message: result
+                                  ? "${widget.serviceItem.name} already present in cart."
+                                  : "${widget.serviceItem.name} added to cart.",
+                              duration: Duration(seconds: 3),
+                              animationDuration: Duration(milliseconds: 300),
+                              isDismissible: true,
+                              flushbarPosition: FlushbarPosition.TOP,
+                              flushbarStyle: FlushbarStyle.FLOATING,
+                              icon: CircleAvatar(
+                                backgroundColor: Colors.white,
+                                child: Icon(
+                                  result ? Icons.warning : Icons.done,
+                                ),
                               ),
-                            );
+                              shouldIconPulse: true,
+                            )..show(context);
                           },
                           child: Container(
                             width: 150,
