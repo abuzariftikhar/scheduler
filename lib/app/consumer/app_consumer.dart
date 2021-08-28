@@ -5,14 +5,14 @@ import 'package:scheduler/ui/splash_page.dart';
 final GlobalKey<NavigatorState> consumerNavigatorKey =
     GlobalKey<NavigatorState>();
 
-class ConumerApp extends StatefulWidget {
-  const ConumerApp({Key? key}) : super(key: key);
+class ConsumerApp extends StatefulWidget {
+  const ConsumerApp({Key? key}) : super(key: key);
 
   @override
-  _ConumerAppState createState() => _ConumerAppState();
+  _ConsumerAppState createState() => _ConsumerAppState();
 }
 
-class _ConumerAppState extends State<ConumerApp> {
+class _ConsumerAppState extends State<ConsumerApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

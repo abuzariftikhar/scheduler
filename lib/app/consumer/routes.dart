@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:scheduler/ui/consumer/home_page.dart';
 
@@ -12,6 +11,5 @@ Route<dynamic>? generateConsumerRoutes(RouteSettings settings) {
       return MaterialPageRoute(
         builder: (context) => ConsumerHomePage(),
       );
-
   }
 }

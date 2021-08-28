@@ -1,14 +1,5 @@
 import 'package:flutter/material.dart';
 
-
-
-
-
-
-
-
-
-
 final pageTransitionsTheme = PageTransitionsTheme(
   builders: {
     TargetPlatform.android: ZoomPageTransitionsBuilder(),
