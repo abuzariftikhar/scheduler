@@ -81,7 +81,7 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
   }
 
   Widget _getwidget(int index) {
-    Widget _widget;
+    Widget _widget = Container();
     if (index == 0) {
       _widget = TodayView();
     }

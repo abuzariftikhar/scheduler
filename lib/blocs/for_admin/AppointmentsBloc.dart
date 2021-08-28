@@ -92,11 +92,11 @@ class AppointmentModel {
   final List<AppointmentType> listOfType;
 
   AppointmentModel({
-    @required this.startTime,
-    @required this.customerName,
-    @required this.status,
-    @required this.date,
-    @required this.listOfType,
+    required this.startTime,
+    required this.customerName,
+    required this.status,
+    required this.date,
+    required this.listOfType,
   });
 }
 
@@ -105,7 +105,7 @@ class AppointmentType {
   final String timeRequired;
 
   AppointmentType({
-    @required this.typeName,
-    @required this.timeRequired,
+    required this.typeName,
+    required this.timeRequired,
   });
 }

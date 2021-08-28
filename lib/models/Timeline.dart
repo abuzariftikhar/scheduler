@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 
 class Timeline {
   String id;
@@ -7,8 +6,8 @@ class Timeline {
 
   Timeline({
     this.id = "",
-    @required this.date,
-    @required this.timelineSpan,
+    required this.date,
+    required this.timelineSpan,
   });
 
   factory Timeline.fromMap(Map<String, dynamic> item) {

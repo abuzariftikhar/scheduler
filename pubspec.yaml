@@ -3,7 +3,7 @@ description: A new Flutter project.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
-publish_to: "none" # Remove this line if you wish to publish to pub.dev
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -18,41 +18,38 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
+  another_flushbar: ^1.10.24
+  cached_network_image: ^3.1.0
+  cloud_firestore: ^2.5.1
+  cupertino_icons: ^1.0.2
+  cupertino_rounded_corners: ^2.0.1
+  firebase_auth: ^3.1.0
+  firebase_storage: ^10.0.3
   flutter:
     sdk: flutter
-  another_flushbar: ^1.10.10
-  cached_network_image: ^2.5.0
-  cloud_firestore: ^0.16.0
-  cupertino_icons: ^1.0.1
-  cupertino_rounded_corners: ^1.0.3
-  firebase_auth: ^0.20.0+1
-  firebase_core: ^0.7.0
-  firebase_storage: ^7.0.0
-  flutter_qr_reader: ^1.0.3
-  font_awesome_flutter: ^8.11.0
-  http_auth: ^0.3.1
-  intl: ^0.16.1
-  lottie: ^0.7.0+1
-  multi_image_picker: ^4.7.14
-  path_provider: ^1.6.27
-  provider: ^4.3.2+3
-  shared_preferences: ^0.5.12+4
-  uuid: ^2.2.2
-  webview_flutter: ^1.0.7
+  flutter_qr_reader: ^1.0.5
+  font_awesome_flutter: ^9.1.0
+  http_auth: ^1.0.1
+  image_picker: ^0.8.3+3
+  lottie: ^1.1.0
+  multi_image_picker: ^4.8.1
+  path_provider: ^2.0.2
+  provider: ^6.0.0
+  uuid: ^3.0.4
+  webview_flutter: ^2.0.12
 
 dev_dependencies:
   flutter_test:
-    sdk: flutter
-  integration_test:
     sdk: flutter
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 # The following section is specific to Flutter.
 flutter:
+
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -71,22 +68,15 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  fonts:
-    - family: OpenSans
-      fonts:
-        - asset: assets/fonts/OpenSans-Regular.ttf
-    - family: CustomIcons
-      fonts:
-        - asset: assets/fonts/CustomIcons.ttf
-    - family: CustomFilledIcons
-      fonts:
-        - asset: assets/fonts/CustomFilledIcons.ttf
-    - family: ServicesIcons
-      fonts:
-        - asset: assets/fonts/ServicesIcons.ttf
-    - family: Pacifico
-      fonts:
-        - asset: assets/fonts/Pacifico-Regular.ttf
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
   #

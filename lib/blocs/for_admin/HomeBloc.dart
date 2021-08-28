@@ -77,8 +77,8 @@ class ListItemModel {
   final Widget routeTo;
 
   ListItemModel({
-    @required this.title,
-    @required this.routeTo,
-    @required this.iconData,
+    required this.title,
+    required this.routeTo,
+    required this.iconData,
   });
 }

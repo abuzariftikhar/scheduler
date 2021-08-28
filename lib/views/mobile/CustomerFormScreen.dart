@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class CustomerFormScreen extends StatefulWidget {
-  final String data;
+  final String? data;
 
-  const CustomerFormScreen( {Key key, this.data}) : super(key: key);
+  const CustomerFormScreen({Key? key, this.data}) : super(key: key);
   @override
   _CustomerFormScreenState createState() => _CustomerFormScreenState();
 }

@@ -9,9 +9,9 @@ class ServiceTile extends StatefulWidget {
   final String heroTag;
   final ServiceItem serviceModel;
   const ServiceTile({
-    Key key,
-    @required this.serviceModel,
-    @required this.heroTag,
+    Key? key,
+    required this.serviceModel,
+    required this.heroTag,
   }) : super(key: key);
   @override
   _ServiceTileState createState() => _ServiceTileState();
@@ -117,9 +117,9 @@ class FiltersTile extends StatefulWidget {
   final String title;
 
   const FiltersTile({
-    Key key,
-    @required this.index,
-    @required this.title,
+    Key? key,
+    required this.index,
+    required this.title,
   }) : super(key: key);
   @override
   _FiltersTileState createState() => _FiltersTileState();

@@ -34,7 +34,7 @@ class ReservationRepositoryImpl extends ReservationReopsitory {
         .where("userId", isEqualTo: userId)
         .get();
     var _list = querySnapshot.docs
-        .map((DocumentSnapshot doc) => Reservation.fromMap(doc.data()))
+        .map((DocumentSnapshot doc) => Reservation.fromMap(doc.data()as Map<String, dynamic>))
         .toList();
     return _list;
   }
@@ -44,7 +44,7 @@ class ReservationRepositoryImpl extends ReservationReopsitory {
     QuerySnapshot querySnapshot =
         await FirebaseFirestore.instance.collection(reservationPath).get();
     var _list = querySnapshot.docs
-        .map((DocumentSnapshot doc) => Reservation.fromMap(doc.data()))
+        .map((DocumentSnapshot doc) => Reservation.fromMap(doc.data() as Map<String, dynamic>))
         .toList();
     return _list;
   }
@@ -56,7 +56,7 @@ class ReservationRepositoryImpl extends ReservationReopsitory {
         .where("date", isEqualTo: date)
         .get();
     var _list = querySnapshot.docs
-        .map((DocumentSnapshot doc) => Reservation.fromMap(doc.data()))
+        .map((DocumentSnapshot doc) => Reservation.fromMap(doc.data()as Map<String, dynamic>))
         .toList();
     return _list;
   }

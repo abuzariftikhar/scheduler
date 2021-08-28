@@ -94,8 +94,8 @@ class QuickServiceTile extends StatefulWidget {
   final ServiceItem serviceItem;
 
   const QuickServiceTile({
-    Key key,
-    @required this.serviceItem,
+    Key? key,
+    required this.serviceItem,
   }) : super(key: key);
   @override
   _QuickServiceTileState createState() => _QuickServiceTileState();

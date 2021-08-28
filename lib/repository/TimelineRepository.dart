@@ -43,7 +43,9 @@ class TimelineRepositoryImpl extends TimelineRepository {
     CollectionReference reference = FirebaseFirestore.instance.collection(path);
     QuerySnapshot querySnapshot =
         await reference.where("date", isEqualTo: date).get();
-    var _list = querySnapshot.docs.map((item) => Timeline.fromMap(item.data()));
+    List<Timeline> _list = querySnapshot.docs
+        .map((item) => Timeline.fromMap(item.data() as Map<String, dynamic>))
+        .toList();
     return _list;
   }
 

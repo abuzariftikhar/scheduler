@@ -54,7 +54,7 @@ class ProfileScreen extends StatelessWidget {
                 return Padding(
                   padding: const EdgeInsets.all(20),
                   child: Text(
-                    "Hi, ${value.auth.currentUser.displayName}",
+                    "Hi, ${value.auth.currentUser!.displayName}",
                     style: TextStyle(
                       fontSize: 36,
                       fontWeight: FontWeight.w900,
@@ -431,7 +431,7 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                     ),
                     Consumer<AuthenticationBloc>(builder: (context, value, _) {
                       return Text(
-                        value.auth.currentUser.displayName,
+                        value.auth.currentUser!.displayName ?? "",
                         style: TextStyle(
                           color: Colors.blue.shade700,
                           decoration: TextDecoration.underline,
@@ -483,7 +483,7 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                     ),
                     Consumer<AuthenticationBloc>(builder: (context, value, _) {
                       return Text(
-                        value.auth.currentUser.email,
+                        value.auth.currentUser!.email ?? "",
                         style: TextStyle(
                           color: Colors.blue.shade700,
                           decoration: TextDecoration.underline,
@@ -535,7 +535,7 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                     ),
                     Consumer<AuthenticationBloc>(builder: (context, value, _) {
                       return Text(
-                        value.auth.currentUser.emailVerified
+                        value.auth.currentUser! .emailVerified 
                             ? "verified"
                             : "Not verified",
                         style: TextStyle(

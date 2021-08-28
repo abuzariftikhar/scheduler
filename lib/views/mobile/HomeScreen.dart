@@ -26,7 +26,7 @@ import 'ProfileScreen.dart';
 class HomeScreen extends StatefulWidget {
   final bool adminMode;
 
-  const HomeScreen({Key key, @required this.adminMode}) : super(key: key);
+  const HomeScreen({Key? key, required this.adminMode}) : super(key: key);
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -335,8 +335,8 @@ class _CustomerHomeState extends State<CustomerHome> {
 class HomeServiceTile extends StatelessWidget {
   final ServiceItem serviceItem;
   const HomeServiceTile({
-    Key key,
-    @required this.serviceItem,
+    Key? key,
+    required this.serviceItem,
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -481,7 +481,10 @@ class HomeServiceTile extends StatelessWidget {
 class HomeServiceTile2 extends StatefulWidget {
   final ServiceItem serviceItem;
 
-  const HomeServiceTile2({Key key, this.serviceItem}) : super(key: key);
+  const HomeServiceTile2({
+    Key? key,
+    required this.serviceItem,
+  }) : super(key: key);
   @override
   _HomeServiceTile2State createState() => _HomeServiceTile2State();
 }
@@ -865,9 +868,9 @@ class HomeCaroselTile extends StatefulWidget {
   final String heroTag;
 
   const HomeCaroselTile({
-    Key key,
-    @required this.serviceItem,
-    @required this.heroTag,
+    Key? key,
+    required this.serviceItem,
+    required this.heroTag,
   }) : super(key: key);
 
   @override
@@ -1277,10 +1280,10 @@ class HomeServiceFilter extends StatelessWidget {
   final IconData iconData;
 
   const HomeServiceFilter({
-    Key key,
-    @required this.index,
-    @required this.title,
-    @required this.iconData,
+    Key? key,
+    required this.index,
+    required this.title,
+    required this.iconData,
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -1364,7 +1367,7 @@ class HomeCart extends StatefulWidget {
 
 class _HomeCartState extends State<HomeCart>
     with SingleTickerProviderStateMixin {
-  AnimationController _controller;
+  late AnimationController _controller;
 
   @override
   void initState() {
@@ -1925,8 +1928,8 @@ class ServiceDetailsView extends StatefulWidget {
   final ServiceItem serviceItem;
 
   const ServiceDetailsView({
-    Key key,
-    @required this.serviceItem,
+    Key? key,
+    required this.serviceItem,
   }) : super(key: key);
   @override
   _ServiceDetailsViewState createState() => _ServiceDetailsViewState();

@@ -14,10 +14,10 @@ class HomeListTile extends StatefulWidget {
   final Widget routeTo;
 
   const HomeListTile({
-    Key key,
-    @required this.title,
-    @required this.iconData,
-    @required this.routeTo,
+    Key? key,
+    required this.title,
+    required this.iconData,
+    required this.routeTo,
   }) : super(key: key);
   @override
   _HomeListTileState createState() => _HomeListTileState();
@@ -49,7 +49,7 @@ class _HomeListTileState extends State<HomeListTile> {
         child: Material(
           color: Colors.white,
           shape: SquircleBorder(
-         radius: BorderRadius.circular(30),
+            radius: BorderRadius.circular(30),
           ),
           child: Padding(
             padding: const EdgeInsets.all(2.0),
@@ -62,7 +62,9 @@ class _HomeListTileState extends State<HomeListTile> {
                   width: 125,
                   child: Material(
                     color: Colors.blueAccent.withOpacity(0.1),
-                    shape: SquircleBorder(radius: BorderRadius.circular(30),),
+                    shape: SquircleBorder(
+                      radius: BorderRadius.circular(30),
+                    ),
                     child: Padding(
                         padding: const EdgeInsets.all(20.0),
                         child: Icon(
@@ -98,14 +100,14 @@ class SingleImageBanner extends StatefulWidget {
   final Widget routeto;
   final String buttonTitle;
 
-  const SingleImageBanner(
-      {Key key,
-      @required this.title,
-      @required this.description,
-      @required this.imageURL,
-      @required this.routeto,
-      this.buttonTitle = 'View now'})
-      : super(key: key);
+  const SingleImageBanner({
+    Key? key,
+    required this.title,
+    required this.description,
+    required this.imageURL,
+    required this.routeto,
+    this.buttonTitle = 'View now',
+  }) : super(key: key);
   @override
   _SingleImageBannerState createState() => _SingleImageBannerState();
 }
@@ -123,7 +125,9 @@ class _SingleImageBannerState extends State<SingleImageBanner> {
             elevation: 1,
             shadowColor: Colors.black54,
             color: Colors.white,
-            shape: SquircleBorder(radius: BorderRadius.circular(50),),
+            shape: SquircleBorder(
+              radius: BorderRadius.circular(50),
+            ),
             child: InkResponse(
               splashColor: Colors.grey.shade100,
               onTap: () {
@@ -163,7 +167,9 @@ class _SingleImageBannerState extends State<SingleImageBanner> {
                         GestureDetector(
                           child: Container(
                             child: Material(
-                              shape: SquircleBorder(radius: BorderRadius.circular(30),),
+                              shape: SquircleBorder(
+                                radius: BorderRadius.circular(30),
+                              ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -268,11 +274,11 @@ class BBarIcon extends StatefulWidget {
   final IconData selectedIcon;
 
   const BBarIcon({
-    Key key,
-    @required this.title,
-    @required this.iconData,
-    @required this.selectedIcon,
-    @required this.index,
+    Key? key,
+    required this.title,
+    required this.iconData,
+    required this.selectedIcon,
+    required this.index,
   }) : super(key: key);
   @override
   _BBarIconState createState() => _BBarIconState();

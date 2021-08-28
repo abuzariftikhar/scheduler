@@ -7,9 +7,9 @@ class Shop {
   final List<DayPeriod> daysOpened;
 
   Shop({
-    @required this.shopName,
-    @required this.openingTime,
-    @required this.closingTime,
-    @required this.daysOpened,
+    required this.shopName,
+    required this.openingTime,
+    required this.closingTime,
+    required this.daysOpened,
   });
 }

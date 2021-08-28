@@ -21,7 +21,7 @@ class ServiceRepositoryImpl extends ServiceReopsitory {
         .where("type", isEqualTo: type)
         .get();
     var _list = querySnapshot.docs
-        .map((DocumentSnapshot doc) => ServiceItem.fromMap(doc.data()))
+        .map((DocumentSnapshot doc) => ServiceItem.fromMap(doc.data()as Map<String, dynamic>))
         .toList();
     return _list;
   }
@@ -33,7 +33,7 @@ class ServiceRepositoryImpl extends ServiceReopsitory {
         .where("category", isEqualTo: category)
         .get();
     var _list = querySnapshot.docs
-        .map((DocumentSnapshot doc) => ServiceItem.fromMap(doc.data()))
+        .map((DocumentSnapshot doc) => ServiceItem.fromMap(doc.data()as Map<String, dynamic>))
         .toList();
     return _list;
   }
@@ -43,7 +43,7 @@ class ServiceRepositoryImpl extends ServiceReopsitory {
     QuerySnapshot querySnapshot =
         await FirebaseFirestore.instance.collection(servicesPath).get();
     var list = querySnapshot.docs
-        .map((DocumentSnapshot doc) => ServiceItem.fromMap(doc.data()))
+        .map((DocumentSnapshot doc) => ServiceItem.fromMap(doc.data()as Map<String, dynamic>))
         .toList();
     return list;
   }

@@ -22,8 +22,8 @@ class AddServiceFormBloc extends ChangeNotifier {
   final picker = ImagePicker();
 
   Future pickImage(ImageSource imageSource) async {
-    final pickedFile = await picker.getImage(source: imageSource);
-    imageFiles.add(File(pickedFile.path));
+    final pickedFile = await picker.pickImage(source: imageSource);
+    imageFiles.add(File(pickedFile!.path));
     notifyListeners();
   }
 

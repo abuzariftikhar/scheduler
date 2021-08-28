@@ -16,11 +16,11 @@ class PaypalServices {
       'EID8tuk9v32yujcL_oCMEwU0j2HfadlNWLdBCOEoFF2G5tDBktfnAoQwy_pfwdSwMmZutHV4ettEnpH3';
 
   // for getting the access token from Paypal
-  Future<String> getAccessToken() async {
+  Future<String?> getAccessToken() async {
     try {
       var client = BasicAuthClient(clientId, secret);
-      var response = await client
-          .post('$domain/v1/oauth2/token?grant_type=client_credentials');
+      var response = await client.post(
+          Uri.parse('$domain/v1/oauth2/token?grant_type=client_credentials'));
       if (response.statusCode == 200) {
         final body = convert.jsonDecode(response.body);
         return body["access_token"];
@@ -32,10 +32,10 @@ class PaypalServices {
   }
 
   // for creating the payment request with Paypal
-  Future<Map<String, String>> createPaypalPayment(
+  Future<Map<String, String>?> createPaypalPayment(
       transactions, accessToken) async {
     try {
-      var response = await http.post("$domain/v1/payments/payment",
+      var response = await http.post(Uri.parse("$domain/v1/payments/payment"),
           body: convert.jsonEncode(transactions),
           headers: {
             "content-type": "application/json",
@@ -71,7 +71,7 @@ class PaypalServices {
   }
 
   // for executing the payment transaction
-  Future<String> executePayment(url, payerId, accessToken) async {
+  Future<String?> executePayment(url, payerId, accessToken) async {
     try {
       var response = await http.post(url,
           body: convert.jsonEncode({"payer_id": payerId}),
@@ -94,7 +94,7 @@ class PaypalServices {
 class PaypalPayment extends StatefulWidget {
   final Function onFinish;
 
-  PaypalPayment({this.onFinish});
+  PaypalPayment({required this.onFinish});
 
   @override
   State<StatefulWidget> createState() {
@@ -104,9 +104,9 @@ class PaypalPayment extends StatefulWidget {
 
 class PaypalPaymentState extends State<PaypalPayment> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  String checkoutUrl;
-  String executeUrl;
-  String accessToken;
+  late String? checkoutUrl;
+  late String? executeUrl;
+  late String? accessToken;
   PaypalServices services = PaypalServices();
 
   // you can change default currency according to your need

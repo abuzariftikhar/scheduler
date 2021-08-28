@@ -17,8 +17,8 @@ class LandingScreen extends StatefulWidget {
 
 class _LandingScreenState extends State<LandingScreen>
     with SingleTickerProviderStateMixin {
-  Animation animation;
-  AnimationController controller;
+  late Animation animation;
+  late AnimationController controller;
 
   @override
   void initState() {
@@ -121,7 +121,7 @@ class _LandingScreenState extends State<LandingScreen>
                                           PageRouteBuilder(pageBuilder:
                                               (context, aniamtion, animtion2) {
                                         return FadeTransition(
-                                          opacity: animation,
+                                          opacity: aniamtion,
                                           child: SignIn(),
                                         );
                                       }));
@@ -140,7 +140,7 @@ class _LandingScreenState extends State<LandingScreen>
                                           PageRouteBuilder(pageBuilder:
                                               (context, aniamtion, animtion2) {
                                         return FadeTransition(
-                                          opacity: animation,
+                                          opacity: aniamtion,
                                           child: SignUp(),
                                         );
                                       }));
@@ -180,15 +180,15 @@ class Button1 extends StatefulWidget {
   final String title;
   final Color titleColor;
   final Color backgroundColor;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final IconData iconData;
   final Color iconColor;
   const Button1({
-    Key key,
-    @required this.title,
-    @required this.titleColor,
-    @required this.iconData,
-    @required this.backgroundColor,
+    Key? key,
+    required this.title,
+    required this.titleColor,
+    required this.iconData,
+    required this.backgroundColor,
     this.iconColor = Colors.white,
     this.onTap,
   }) : super(key: key);
@@ -264,15 +264,15 @@ class Button2 extends StatefulWidget {
   final String title;
   final Color titleColor;
   final Color backgroundColor;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final IconData iconData;
   final Color iconColor;
   const Button2({
-    Key key,
-    @required this.title,
-    @required this.titleColor,
-    @required this.iconData,
-    @required this.backgroundColor,
+    Key? key,
+    required this.title,
+    required this.titleColor,
+    required this.iconData,
+    required this.backgroundColor,
     this.iconColor = Colors.white,
     this.onTap,
   }) : super(key: key);
@@ -349,16 +349,16 @@ class PaymentButton extends StatefulWidget {
   final String title;
   final Color titleColor;
   final Color backgroundColor;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final IconData iconData;
   final Color iconColor;
   const PaymentButton({
-    Key key,
-    @required this.index,
-    @required this.title,
-    @required this.titleColor,
-    @required this.iconData,
-    @required this.backgroundColor,
+    Key? key,
+    required this.index,
+    required this.title,
+    required this.titleColor,
+    required this.iconData,
+    required this.backgroundColor,
     this.iconColor = Colors.white,
     this.onTap,
   }) : super(key: key);

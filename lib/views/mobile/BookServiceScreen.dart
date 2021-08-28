@@ -24,7 +24,7 @@ class BookServiceScreen extends StatefulWidget {
 
 class _BookServiceScreenState extends State<BookServiceScreen> {
   final DateFormat formatter = DateFormat('yyyy-MM-dd');
-  String date;
+  String? date;
 
   Widget _getBookingScreen(int index) {
     Widget _widget = Container();
@@ -40,35 +40,35 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
     return _widget;
   }
 
-  Future<bool> _onBackPressed(BuildContext context) {
-    return showDialog(
-        barrierColor: Colors.blueGrey.withOpacity(0.95),
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Row(
-              children: [
-                Icon(
-                  CustomFilledIcons.fi_sr_exclamation,
-                  size: 18,
-                  color: Colors.orange,
-                ),
-                SizedBox(width: 5),
-                Text('Exit'),
-              ],
-            ),
-            content: Text("Do you wish to cancel booking?"),
-            actions: <Widget>[
-              TextButton(
-                  child: Text('NO'),
-                  onPressed: () => Navigator.pop(context, false)),
-              TextButton(
-                  child: Text('Yes'),
-                  onPressed: () => Navigator.pop(context, true))
-            ],
-          );
-        });
-  }
+  // Future<bool> _onBackPressed(BuildContext context) {
+  //   return showDialog(
+  //       barrierColor: Colors.blueGrey.withOpacity(0.95),
+  //       context: context,
+  //       builder: (BuildContext context) {
+  //         return AlertDialog(
+  //           title: Row(
+  //             children: [
+  //               Icon(
+  //                 CustomFilledIcons.fi_sr_exclamation,
+  //                 size: 18,
+  //                 color: Colors.orange,
+  //               ),
+  //               SizedBox(width: 5),
+  //               Text('Exit'),
+  //             ],
+  //           ),
+  //           content: Text("Do you wish to cancel booking?"),
+  //           actions: <Widget>[
+  //             TextButton(
+  //                 child: Text('NO'),
+  //                 onPressed: () => Navigator.pop(context, false)),
+  //             TextButton(
+  //                 child: Text('Yes'),
+  //                 onPressed: () => Navigator.pop(context, true))
+  //           ],
+  //         );
+  //       });
+  // }
 
   void initState() {
     date = formatter.format(DateTime.now());
@@ -80,34 +80,31 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () => _onBackPressed(context),
-      child: Scaffold(
-          backgroundColor: Colors.white,
-          body: Stack(
-            children: [
-              Consumer<BookingScreenBloc>(builder: (context, value, _) {
-                return AnimatedSwitcher(
-                    duration: Duration(milliseconds: 400),
-                    reverseDuration: Duration(milliseconds: 10),
-                    transitionBuilder: (child, animation) => SlideTransition(
-                          position: Tween<Offset>(
-                                  begin: Offset(
-                                    value.widgetIndex > value.previousIndex
-                                        ? 1
-                                        : -1,
-                                    0,
-                                  ),
-                                  end: Offset(0, 0))
-                              .chain(CurveTween(curve: Curves.easeOutCirc))
-                              .animate(animation),
-                          child: child,
-                        ),
-                    child: _getBookingScreen(value.widgetIndex));
-              }),
-            ],
-          )),
-    );
+    return Scaffold(
+        backgroundColor: Colors.white,
+        body: Stack(
+          children: [
+            Consumer<BookingScreenBloc>(builder: (context, value, _) {
+              return AnimatedSwitcher(
+                  duration: Duration(milliseconds: 400),
+                  reverseDuration: Duration(milliseconds: 10),
+                  transitionBuilder: (child, animation) => SlideTransition(
+                        position: Tween<Offset>(
+                                begin: Offset(
+                                  value.widgetIndex > value.previousIndex
+                                      ? 1
+                                      : -1,
+                                  0,
+                                ),
+                                end: Offset(0, 0))
+                            .chain(CurveTween(curve: Curves.easeOutCirc))
+                            .animate(animation),
+                        child: child,
+                      ),
+                  child: _getBookingScreen(value.widgetIndex));
+            }),
+          ],
+        ));
   }
 }
 
@@ -135,15 +132,15 @@ class SlotTile extends StatefulWidget {
   final String to;
   final int index;
   final bool isReserved;
-  final Function onTap;
+  final VoidCallback onTap;
 
   const SlotTile({
-    Key key,
-    @required this.from,
-    @required this.to,
-    @required this.index,
-    @required this.isReserved,
-    @required this.onTap,
+    Key? key,
+    required this.from,
+    required this.to,
+    required this.index,
+    required this.isReserved,
+    required this.onTap,
   }) : super(key: key);
 
   @override
@@ -456,7 +453,7 @@ class DateTimeSelectionScreen extends StatefulWidget {
 
 class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
   final DateFormat formatter = DateFormat('yyyy-MM-dd');
-  String date;
+  String? date;
 
   @override
   void initState() {
@@ -622,7 +619,7 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
                                     const EdgeInsets.symmetric(horizontal: 15),
                                 child: Center(
                                   child: Text(
-                                    date,
+                                    date!,
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
@@ -1005,7 +1002,7 @@ class BookingSuccessScreen extends StatefulWidget {
 
 class _BookingSuccessScreenState extends State<BookingSuccessScreen>
     with SingleTickerProviderStateMixin {
-  AnimationController _controller;
+  late AnimationController _controller;
 
   @override
   void initState() {

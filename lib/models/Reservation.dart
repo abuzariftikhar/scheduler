@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:scheduler/models/ServiceModel.dart';
 
 class Reservation {
@@ -11,11 +10,11 @@ class Reservation {
 
   Reservation({
     this.id = '',
-    @required this.userId,
-    @required this.listOfServices,
-    @required this.date,
-    @required this.slots,
-    @required this.paymentMethod,
+    required this.userId,
+    required this.listOfServices,
+    required this.date,
+    required this.slots,
+    required this.paymentMethod,
   });
 
   factory Reservation.fromMap(Map<String, dynamic> reservation) {

@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 
 class UserModel {
   final String username;
@@ -6,9 +5,9 @@ class UserModel {
   final int role;
 
   UserModel({
-    @required this.username,
-    @required this.userID,
-    @required this.role,
+    required this.username,
+    required this.userID,
+    required this.role,
   });
 
   factory UserModel.fromMap(Map<String, dynamic> item) {

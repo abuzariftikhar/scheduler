@@ -8,9 +8,9 @@ class HeaderTile extends StatefulWidget {
   final String title;
 
   const HeaderTile({
-    Key key,
-    @required this.index,
-    @required this.title,
+    Key? key,
+    required this.index,
+    required this.title,
   }) : super(key: key);
   @override
   _HeaderTileState createState() => _HeaderTileState();
@@ -60,12 +60,12 @@ class AppointmentTile extends StatefulWidget {
   final String status;
 
   const AppointmentTile({
-    Key key,
-    @required this.color,
-    @required this.title,
-    @required this.type,
-    @required this.status,
-    @required this.dateTime,
+    Key? key,
+    required this.color,
+    required this.title,
+    required this.type,
+    required this.status,
+    required this.dateTime,
   }) : super(key: key);
 
   @override
@@ -86,7 +86,9 @@ class _AppointmentTileState extends State<AppointmentTile> {
             child: Container(
               margin: EdgeInsets.all(5),
               child: Material(
-                shape: SquircleBorder(radius: BorderRadius.circular(30),),
+                shape: SquircleBorder(
+                  radius: BorderRadius.circular(30),
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -140,7 +142,9 @@ class _AppointmentTileState extends State<AppointmentTile> {
             height: 130,
             width: MediaQuery.of(context).size.width - 135,
             child: Material(
-              shape: SquircleBorder(radius: BorderRadius.circular(30),),
+              shape: SquircleBorder(
+                radius: BorderRadius.circular(30),
+              ),
               child: Column(
                 children: [
                   SizedBox(height: 10),
@@ -174,7 +178,9 @@ class _AppointmentTileState extends State<AppointmentTile> {
                           child: Material(
                             clipBehavior: Clip.antiAlias,
                             color: Colors.blueGrey.shade50,
-                            shape: SquircleBorder(radius: BorderRadius.circular(30),),
+                            shape: SquircleBorder(
+                              radius: BorderRadius.circular(30),
+                            ),
                             child: Image.asset('assets/avatar.png'),
                           ),
                         ),
@@ -255,19 +261,16 @@ class _AppointmentTileState extends State<AppointmentTile> {
     switch (status) {
       case 'Served':
         return Colors.green;
-        break;
       case 'Cancelled':
         return Colors.red;
-        break;
       case 'Checked-in':
         return Colors.blue;
       case 'Served':
         return Colors.green;
-        break;
       case 'Pending':
         return Colors.orange;
       default:
-        return Colors.white;
+        return Colors.amber;
     }
   }
 }
@@ -275,8 +278,8 @@ class _AppointmentTileState extends State<AppointmentTile> {
 class DateTile extends StatefulWidget {
   final int day;
   const DateTile({
-    Key key,
-    @required this.day,
+    Key? key,
+    required this.day,
   }) : super(key: key);
   @override
   _DateTileState createState() => _DateTileState();
@@ -324,9 +327,9 @@ class CompletedTile extends StatefulWidget {
   final String type;
 
   const CompletedTile({
-    Key key,
-    @required this.customerName,
-    @required this.type,
+    Key? key,
+    required this.customerName,
+    required this.type,
   }) : super(key: key);
 
   @override

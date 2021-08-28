@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 
 class ServiceItem {
   String id;
@@ -12,13 +11,13 @@ class ServiceItem {
 
   ServiceItem({
     this.id = "",
-    @required this.name,
-    @required this.type,
-    @required this.category,
-    @required this.cost,
-    @required this.timeRequired,
-    @required this.imageURLs,
-    @required this.detailText,
+    required this.name,
+    required this.type,
+    required this.category,
+    required this.cost,
+    required this.timeRequired,
+    required this.imageURLs,
+    required this.detailText,
   });
 
   factory ServiceItem.fromMap(Map<String, dynamic> item) {

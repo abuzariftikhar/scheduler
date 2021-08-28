@@ -19,7 +19,7 @@ class CustomFilledIcons {
   CustomFilledIcons._();
 
   static const _kFontFam = 'CustomFilledIcons';
-  static const String _kFontPkg = null;
+  static const String? _kFontPkg = null;
 
   static const IconData fi_sr_add =
       IconData(0xe800, fontFamily: _kFontFam, fontPackage: _kFontPkg);

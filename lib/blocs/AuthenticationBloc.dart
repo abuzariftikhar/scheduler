@@ -13,14 +13,11 @@ class AuthenticationBloc extends ChangeNotifier {
     try {
       isBusy = true;
       notifyListeners();
-      await auth
-          .createUserWithEmailAndPassword(
-            email: email,
-            password: password,
-          )
-          .then((value) => value.user.updateProfile(
-                displayName: displayName,
-              ));
+      await auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
       isBusy = false;
       return true;
     } on FirebaseAuthException catch (e) {
@@ -52,11 +49,11 @@ class AuthenticationBloc extends ChangeNotifier {
       isBusy = false;
       return true;
     } catch (e) {
-      if (e.code == 'user-not-found') {
-        signInError = 'No user found for this email.';
-      } else if (e.code == 'wrong-password') {
-        signInError = 'Incorrect password';
-      }
+      // if (e.code == 'user-not-found') {
+      //   signInError = 'No user found for this email.';
+      // } else if (e.code == 'wrong-password') {
+      //   signInError = 'Incorrect password';
+      // }
       isBusy = false;
       notifyListeners();
       return false;

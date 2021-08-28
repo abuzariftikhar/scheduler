@@ -11,9 +11,9 @@ class ServiceDetailsScreen extends StatefulWidget {
   final ServiceItem serviceModel;
 
   const ServiceDetailsScreen({
-    Key key,
-    @required this.serviceModel,
-    @required this.heroTag,
+    Key? key,
+    required this.serviceModel,
+    required this.heroTag,
   }) : super(key: key);
   @override
   _ServiceDetailsScreenState createState() => _ServiceDetailsScreenState();
@@ -117,7 +117,9 @@ class _ServiceDetailsScreenState extends State<ServiceDetailsScreen> {
                           child: Material(
                             elevation: 5,
                             color: Colors.blueAccent,
-                            shape: SquircleBorder(radius: BorderRadius.circular(40),),
+                            shape: SquircleBorder(
+                              radius: BorderRadius.circular(40),
+                            ),
                             child: Center(
                               child: Text(
                                 "Add to Booking List",

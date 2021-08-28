@@ -19,7 +19,7 @@ class ServicesIcons {
   ServicesIcons._();
 
   static const _kFontFam = 'ServicesIcons';
-  static const String _kFontPkg = null;
+  static const String? _kFontPkg = null;
 
   static const IconData face_mask =
       IconData(0xe800, fontFamily: _kFontFam, fontPackage: _kFontPkg);

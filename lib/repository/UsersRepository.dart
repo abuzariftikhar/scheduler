@@ -27,7 +27,8 @@ class UsersRepositoryImpl extends UsersRepository {
   Future<UserModel> getCurrentUser(String userID) async {
     DocumentSnapshot documentSnapshot =
         await FirebaseFirestore.instance.collection(path).doc(userID).get();
-    var _user = UserModel.fromMap(documentSnapshot.data());
+    var _user =
+        UserModel.fromMap(documentSnapshot.data() as Map<String, dynamic>);
     return _user;
   }
 
