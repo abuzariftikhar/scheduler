@@ -9,6 +9,17 @@ class SpalshPage extends StatefulWidget {
 
 class _SpalshPageState extends State<SpalshPage> {
   @override
+  void initState() {
+    // Future.delayed(
+    //   Duration(milliseconds: 2000),
+    //   () {
+    //     Navigator.pushReplacementNamed(context, ConsumerHomePage.route);
+    //   },
+    // );
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container();
   }
